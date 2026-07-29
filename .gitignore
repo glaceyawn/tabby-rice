@@ -1,0 +1,3 @@
+# nothing generated lives in the repo — theme-switch writes into ~, not here
+*.zip
+.DS_Store

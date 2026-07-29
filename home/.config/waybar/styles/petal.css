@@ -1,0 +1,129 @@
+/* WAYBAR — "petal islands"
+   three floating clusters, petal corners, beam actives, no capsules
+   colors from colors.css (theme-switch) */
+@import "colors.css";
+
+* {
+    font-family: "JetBrainsMono Nerd Font", "Symbols Nerd Font", monospace;
+    font-size: 13px;
+    font-weight: 600;
+    min-height: 0;
+    padding: 0;
+    margin: 0;
+}
+
+window#waybar {
+    background: transparent;
+    color: @fg;
+}
+window#waybar > box { background: transparent; }
+
+/* the three islands — petal corners are the signature */
+.modules-left {
+    background: alpha(@bg, 0.92);
+    border: 1px solid alpha(@bg2, 0.8);
+    border-radius: 18px 6px 18px 6px;
+    padding: 0 12px;
+    margin: 4px 8px;
+}
+.modules-center {
+    background: alpha(@bg, 0.92);
+    border: 1px solid alpha(@bg2, 0.8);
+    border-radius: 6px 18px 6px 18px;
+    padding: 0 4px;
+    margin: 4px 0;
+}
+.modules-right {
+    background: alpha(@bg, 0.92);
+    border: 1px solid alpha(@bg2, 0.8);
+    border-radius: 18px 6px 18px 6px;
+    padding: 0 10px;
+    margin: 4px 8px;
+}
+
+tooltip {
+    background: @bg1;
+    border: 1px solid @bg2;
+    border-radius: 12px 4px 12px 4px;
+}
+tooltip label { color: @fg; padding: 6px; }
+
+/* ── left ── */
+#custom-logo {
+    font-size: 16px;
+    color: @accent;
+    padding: 0 10px 0 2px;
+}
+
+#workspaces button {
+    color: @muted;
+    padding: 0 7px;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    border-radius: 0;
+    transition: all 0.2s ease;
+}
+#workspaces button:hover {
+    color: @fg;
+    border-bottom: 2px solid alpha(@accent, 0.4);
+}
+#workspaces button.active {
+    color: @accent;
+    font-weight: 800;
+    border-bottom: 2px solid @accent;
+}
+#workspaces button.urgent {
+    color: @red;
+    border-bottom: 2px solid @red;
+}
+
+#submap { color: @yellow; padding: 0 8px; }
+#window { color: @muted; padding: 0 12px 0 8px; font-weight: 400; }
+
+/* ── center: the clock capsule ── */
+#clock {
+    color: @fg;
+    padding: 0 18px;
+    font-weight: 700;
+}
+
+/* ── right: bare colored glyphs, breathing room ── */
+#mpris, #cpu, #memory, #network, #backlight,
+#wireplumber, #battery, #tray,
+#custom-theme, #custom-wallpaper, #custom-power {
+    background: transparent;
+    padding: 0 9px;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s ease;
+}
+#mpris:hover, #cpu:hover, #memory:hover, #network:hover,
+#backlight:hover, #wireplumber:hover, #battery:hover,
+#custom-theme:hover, #custom-wallpaper:hover, #custom-power:hover {
+    border-bottom: 2px solid alpha(@fg, 0.35);
+}
+
+#mpris        { color: @green; font-style: italic; }
+#mpris.paused { color: @muted; }
+#cpu          { color: @cyan; }
+#memory       { color: @blue; }
+#network      { color: @green; }
+#network.disconnected { color: @red; }
+#backlight    { color: @yellow; }
+#wireplumber  { color: @magenta; }
+#wireplumber.muted { color: @muted; }
+#battery          { color: @green; }
+#battery.charging { color: @cyan; }
+#battery.warning:not(.charging)  { color: @yellow; }
+#battery.critical:not(.charging) { color: @red; border-bottom: 2px solid @red; }
+#cpu.warning, #memory.warning    { color: @yellow; }
+#cpu.critical, #memory.critical  { color: @red; border-bottom: 2px solid @red; }
+
+#custom-theme     { color: @magenta; }
+#custom-wallpaper { color: @cyan; }
+
+#custom-power {
+    color: @red;
+    font-size: 14px;
+    padding: 0 4px 0 10px;
+}

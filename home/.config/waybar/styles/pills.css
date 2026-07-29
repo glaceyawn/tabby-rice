@@ -1,0 +1,57 @@
+/* pills — bubbly capsules, theme-driven */
+@import "colors.css";
+* {
+    font-family: "JetBrainsMono Nerd Font", "Symbols Nerd Font", monospace;
+    font-size: 13px; font-weight: 600; min-height: 0; padding: 0; margin: 0;
+}
+window#waybar { background: transparent; color: @fg; }
+window#waybar > box {
+    background: alpha(@bg, 0.92);
+    border: 2px solid @bg2;
+    border-radius: 20px;
+    padding: 0 8px;
+    margin: 4px 8px;
+}
+tooltip { background: @bg1; border: 2px solid @bg2; border-radius: 14px; }
+tooltip label { color: @fg; padding: 6px; }
+
+#custom-logo {
+    font-size: 16px; color: @accent; background: @bg1;
+    border-radius: 99px; padding: 0 12px; margin: 4px 4px 4px 2px;
+}
+#workspaces { background: @bg1; border-radius: 99px; padding: 2px 5px; margin: 4px 2px; }
+#workspaces button {
+    color: @muted; border-radius: 99px; padding: 0 8px; margin: 0 1px;
+    background: transparent; border: none;
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+#workspaces button:hover { color: @fg; background: @bg2; }
+#workspaces button.active { color: @bg; background: @accent; padding: 0 14px; }
+#workspaces button.urgent { color: @bg; background: @red; }
+#submap { color: @yellow; background: @bg1; border-radius: 99px; padding: 0 12px; margin: 4px 2px; }
+#window { color: @muted; padding: 0 10px; }
+#clock { color: @fg; background: @bg1; border-radius: 99px; padding: 0 16px; margin: 4px 0; }
+
+#mpris, #cpu, #memory, #network, #backlight, #wireplumber, #battery, #tray,
+#custom-theme, #custom-wallpaper {
+    background: @bg1; border-radius: 99px; padding: 0 11px; margin: 4px 2px;
+    transition: all 0.2s ease;
+}
+#mpris:hover, #cpu:hover, #memory:hover, #network:hover, #backlight:hover,
+#wireplumber:hover, #battery:hover, #custom-theme:hover, #custom-wallpaper:hover { background: @bg2; }
+#mpris { color: @green; } #mpris.paused { color: @muted; font-style: italic; }
+#cpu { color: @cyan; } #memory { color: @blue; }
+#network { color: @green; } #network.disconnected { color: @red; }
+#backlight { color: @yellow; }
+#wireplumber { color: @magenta; } #wireplumber.muted { color: @muted; }
+#battery { color: @green; } #battery.charging { color: @cyan; }
+#battery.warning:not(.charging) { color: @yellow; }
+#battery.critical:not(.charging) { color: @red; background: alpha(@red, 0.2); }
+#cpu.warning, #memory.warning { color: @yellow; }
+#cpu.critical, #memory.critical { color: @red; background: alpha(@red, 0.2); }
+#custom-theme { color: @magenta; } #custom-wallpaper { color: @cyan; }
+#custom-power {
+    color: @bg; background: @accent; border-radius: 99px;
+    padding: 0 13px; margin: 4px 2px 4px 3px; font-size: 14px;
+}
+#custom-power:hover { background: @fg; }
