@@ -28,7 +28,12 @@
 
 </div>
 
-
+|  |  |
+|:---:|:---:|
+| ![petal](assets/petal-graphite.png) | ![pills](assets/pills-mocha.png) |
+| **petal** — floating islands · graphite | **pills** — bubbly capsules · mocha |
+| ![ghost](assets/ghost-tokyonight.png) | ![fetch](assets/fastfetch.png) |
+| **ghost** — the bar dissolves into the wall · tokyo night | the fastfetch splash |
 
 <br>
 
