@@ -1,0 +1,109 @@
+/* ROFI — graphite, toned down (no gradients, fixes the parse error) */
+
+configuration {
+    modi: "drun,run,window,filebrowser";
+    show-icons: true;
+    icon-theme: "Papirus-Dark";
+    drun-display-format: "{name}";
+    display-drun: "apps";
+    display-run: "run";
+    display-window: "windows";
+    display-filebrowser: "files";
+    font: "JetBrainsMono Nerd Font 12";
+    terminal: "kitty";
+    matching: "fuzzy";
+    sort: true;
+    sorting-method: "fzf";
+    drun-match-fields: "name,generic,exec,keywords";
+    kb-mode-next: "Shift+Right,Control+Tab";
+    kb-mode-previous: "Shift+Left,Control+ISO_Left_Tab";
+}
+
+@import "colors.rasi"
+
+* {
+    background-color: transparent;
+    text-color: @fg0;
+}
+
+window {
+    width: 40%;
+    location: center;
+    border: 2px;
+    border-radius: 22px;
+    border-color: @bg2;
+    background-color: @bg0;
+    transparency: "real";
+}
+
+mainbox {
+    padding: 14px;
+    spacing: 10px;
+    children: [ inputbar, mode-switcher, listview ];
+}
+
+inputbar {
+    background-color: @bg1;
+    border-radius: 16px;
+    padding: 10px 14px;
+    spacing: 10px;
+    children: [ prompt, entry ];
+}
+
+prompt { text-color: @accent; }
+
+entry {
+    placeholder: "search…";
+    placeholder-color: @muted;
+    cursor: text;
+}
+
+mode-switcher { spacing: 6px; }
+
+button {
+    background-color: @bg1;
+    text-color: @muted;
+    border-radius: 14px;
+    padding: 6px 0;
+}
+
+button selected {
+    background-color: @accent;
+    text-color: #161616;
+}
+
+listview {
+    columns: 1;
+    lines: 8;
+    spacing: 3px;
+    fixed-height: true;
+    cycle: true;
+    scrollbar: false;
+}
+
+element {
+    border-radius: 14px;
+    padding: 8px 10px;
+    spacing: 10px;
+    cursor: pointer;
+}
+
+element normal.normal, element alternate.normal {
+    background-color: transparent;
+    text-color: @fg0;
+}
+
+element selected.normal {
+    background-color: @bg2;
+    text-color: @fg0;
+    border: 0 0 0 3px;
+    border-color: @accent;
+}
+
+element urgent {
+    background-color: #bf8b8b;
+    text-color: #161616;
+}
+
+element-icon { size: 1.6em; cursor: inherit; }
+element-text { vertical-align: 0.5; cursor: inherit; text-color: inherit; }

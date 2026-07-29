@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+# bar-switch — swap waybar style and screen position
+# usage: bar-switch                     (rofi menus)
+#        bar-switch <style>             (keep position)
+#        bar-switch <style> <position>  (petal|pills|flat|ghost, top|bottom)
+set -u
+WB="$HOME/.config/waybar"
+TE="$HOME/.config/theme-engine"
+STATE="$TE/bar"
+
+# current state
+CUR_STYLE="petal"; CUR_POS="top"
+[ -f "$STATE" ] && . "$STATE"
+
+STYLE="${1:-}"; POS="${2:-}"
+
+if [ -z "$STYLE" ]; then
+    STYLE="$(printf '%b\n' \
+        "󰠳  petal — floating islands" \
+        "󰝤  pills — bubbly capsules" \
+        "󰹞  flat — attached, edge-to-edge" \
+        "󰊠  ghost — no bar, floating text" \
+    | rofi -dmenu -p "󰍜 bar style" -i | awk '{print $2}')"
+    [ -z "$STYLE" ] && exit 0
+    POS="$(printf '%b\n' "󰁝  top" "󰁅  bottom" \
+    | rofi -dmenu -p "󰍜 position" -i | awk '{print $2}')"
+    [ -z "$POS" ] && POS="$CUR_POS"
+fi
+[ -z "$POS" ] && POS="$CUR_POS"
+
+[ -f "$WB/styles/$STYLE.css" ] || { notify-send -a theme "bar" "no such style: $STYLE"; exit 1; }
+case "$POS" in top|bottom) ;; *) notify-send -a theme "bar" "position must be top or bottom"; exit 1 ;; esac
+
+# apply style
+cp "$WB/styles/$STYLE.css" "$WB/style.css"
+
+# apply position + margins (flat sits flush, others float)
+if [ "$STYLE" = "flat" ]; then M=0; H=28; else M=4; H=30; fi
+sed -i \
+    -e "s/\"position\": \"[a-z]*\"/\"position\": \"$POS\"/" \
+    -e "s/\"margin-top\": [0-9]*/\"margin-top\": $M/" \
+    -e "s/\"margin-left\": [0-9]*/\"margin-left\": $((M + M))/" \
+    -e "s/\"margin-right\": [0-9]*/\"margin-right\": $((M + M))/" \
+    -e "s/\"height\": [0-9]*/\"height\": $H/" \
+    "$WB/config.jsonc"
+
+printf 'CUR_STYLE="%s"\nCUR_POS="%s"\n' "$STYLE" "$POS" > "$STATE"
+pkill waybar; waybar >/dev/null 2>&1 & disown
+notify-send -a theme "bar" "$STYLE · $POS"

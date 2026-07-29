@@ -1,0 +1,127 @@
+#!/usr/bin/env bash
+# rice-welcome — greeting + keybind cheatsheet, shown after install & on Super+Shift+H
+# renders a theme-colored panel via a temporary HTML file in your browser,
+# with a terminal fallback if no GUI browser is around.
+set -u
+TE="$HOME/.config/theme-engine"
+THEME="$(cat "$TE/current" 2>/dev/null || echo graphite)"
+. "$TE/themes/$THEME.sh" 2>/dev/null || { BG=161616; BG1=1e1e1e; BG2=262626; FG=d4d4d4; MUTED=6a6a6a; ACCENT=8fa1b3; GREEN=9ab08f; YELLOW=c4a97b; MAGENTA=b096b0; CYAN=8fb3ab; RED=bf8b8b; }
+
+HTML="$(mktemp --suffix=.html)"
+cat > "$HTML" << EOF
+<!doctype html><html><head><meta charset="utf-8"><title>tabby rice</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background:#${BG}; color:#${FG};
+    font-family:"JetBrainsMono Nerd Font","JetBrains Mono",monospace;
+    display:flex; align-items:center; justify-content:center; min-height:100vh; padding:40px;
+  }
+  .card {
+    background:#${BG1}; border:2px solid #${BG2}; border-radius:20px;
+    padding:36px 44px; max-width:820px; width:100%;
+    box-shadow:0 20px 60px rgba(0,0,0,.4);
+  }
+  .cat { color:#${ACCENT}; font-size:12px; line-height:1.2; white-space:pre; margin-bottom:8px; }
+  h1 { font-size:26px; margin-bottom:4px; }
+  h1 .by { color:#${MUTED}; font-size:16px; font-weight:400; }
+  .sub { color:#${MUTED}; margin-bottom:28px; font-size:14px; }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:24px 40px; }
+  .col h2 {
+    font-size:13px; text-transform:uppercase; letter-spacing:1px;
+    color:#${ACCENT}; margin-bottom:12px; padding-bottom:6px;
+    border-bottom:1px solid #${BG2};
+  }
+  .row { display:flex; justify-content:space-between; align-items:center; padding:5px 0; font-size:14px; }
+  .row .k {
+    background:#${BG2}; color:#${FG}; padding:3px 9px; border-radius:7px;
+    font-size:12px; font-weight:600; white-space:nowrap; margin-left:12px;
+  }
+  .row .d { color:#${FG}; }
+  .accent-hi { color:#${MAGENTA}; }
+  .footer {
+    margin-top:28px; padding-top:18px; border-top:1px solid #${BG2};
+    display:flex; justify-content:space-between; align-items:center; font-size:13px; color:#${MUTED};
+  }
+  .footer b { color:#${GREEN}; }
+  .pills { display:flex; gap:6px; }
+  .pill { width:12px; height:12px; border-radius:99px; }
+</style></head>
+<body><div class="card">
+  <div class="cat"> /\\_____/\\
+/  o   o  \\    <span style="color:#${FG}">welcome to</span>
+( ==  ^  == )</div>
+  <h1>tabby rice <span class="by">· by tabby</span></h1>
+  <div class="sub">hyprland · waybar · rofi · kitty · mako · fastfetch · fish — theme: <span class="accent-hi">${THEME}</span></div>
+
+  <div class="grid">
+    <div class="col">
+      <h2>the rice controls</h2>
+      <div class="row"><span class="d">switch theme (7 themes)</span><span class="k">Super F2</span></div>
+      <div class="row"><span class="d">wallpaper picker</span><span class="k">Super F3</span></div>
+      <div class="row"><span class="d">random wallpaper</span><span class="k">Super Shift F3</span></div>
+      <div class="row"><span class="d">bar style + position</span><span class="k">Super F4</span></div>
+      <div class="row"><span class="d">bar → which monitor</span><span class="k">Super Shift F4</span></div>
+      <div class="row"><span class="d">show this help again</span><span class="k">Super Shift H</span></div>
+    </div>
+    <div class="col">
+      <h2>launching apps</h2>
+      <div class="row"><span class="d">app launcher (rofi)</span><span class="k">Super Space</span></div>
+      <div class="row"><span class="d">firefox</span><span class="k">Super B</span></div>
+      <div class="row"><span class="d">terminal (kitty)</span><span class="k">Super T</span></div>
+      <div class="row"><span class="d">neovim</span><span class="k">Super N</span></div>
+      <div class="row"><span class="d">file manager</span><span class="k">Super E</span></div>
+      <div class="row"><span class="d">dropdown terminal</span><span class="k">Super S</span></div>
+    </div>
+    <div class="col">
+      <h2>windows</h2>
+      <div class="row"><span class="d">close window</span><span class="k">Super Q</span></div>
+      <div class="row"><span class="d">toggle floating</span><span class="k">Super V</span></div>
+      <div class="row"><span class="d">fullscreen</span><span class="k">Super F</span></div>
+      <div class="row"><span class="d">move focus</span><span class="k">Super ← ↑ ↓ →</span></div>
+      <div class="row"><span class="d">move window</span><span class="k">Super Shift ←→</span></div>
+      <div class="row"><span class="d">workspace 1-9</span><span class="k">Super 1-9</span></div>
+    </div>
+    <div class="col">
+      <h2>system</h2>
+      <div class="row"><span class="d">clipboard history</span><span class="k">Super C</span></div>
+      <div class="row"><span class="d">region screenshot</span><span class="k">Super Shift S</span></div>
+      <div class="row"><span class="d">dismiss notification</span><span class="k">Super W</span></div>
+      <div class="row"><span class="d">do-not-disturb</span><span class="k">Super F1</span></div>
+      <div class="row"><span class="d">lock screen</span><span class="k">Super L</span></div>
+      <div class="row"><span class="d">volume / brightness</span><span class="k">media keys</span></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <span>edit configs in <b>~/.config</b> · full binds in <b>hyprland.conf</b> · add themes in <b>theme-engine/themes/</b></span>
+    <div class="pills">
+      <span class="pill" style="background:#${RED}"></span>
+      <span class="pill" style="background:#${YELLOW}"></span>
+      <span class="pill" style="background:#${GREEN}"></span>
+      <span class="pill" style="background:#${CYAN}"></span>
+      <span class="pill" style="background:#${ACCENT}"></span>
+      <span class="pill" style="background:#${MAGENTA}"></span>
+    </div>
+  </div>
+</div></body></html>
+EOF
+
+# try a GUI browser; fall back to a terminal cheatsheet
+BROWSER_BIN="$(command -v firefox || command -v chromium || command -v brave || command -v xdg-open || true)"
+if [ -n "$BROWSER_BIN" ] && [ -n "${WAYLAND_DISPLAY:-}${DISPLAY:-}" ]; then
+    "$BROWSER_BIN" "$HTML" >/dev/null 2>&1 &
+    disown
+    # clean up the temp file after the browser has had time to load it
+    ( sleep 20; rm -f "$HTML" ) >/dev/null 2>&1 &
+    disown
+else
+    rm -f "$HTML"
+    C_A="\033[38;5;110m"; C_M="\033[38;5;139m"; C_R="\033[0m"; C_D="\033[2m"
+    printf "\n${C_A}  tabby rice${C_R} — keybinds\n\n"
+    printf "  ${C_M}RICE${C_R}   F2 theme · F3 wallpaper (Shift=random) · F4 bar style · Shift+F4 bar monitor · Shift+H this help\n"
+    printf "  ${C_M}APPS${C_R}   Space rofi · B firefox · T kitty · N nvim · E files · S dropdown term\n"
+    printf "  ${C_M}WIN${C_R}    Q close · V float · F fullscreen · arrows focus · Shift+arrows move · 1-9 workspace\n"
+    printf "  ${C_M}SYS${C_R}    C clipboard · Shift+S screenshot · W dismiss notif · F1 dnd · L lock · media keys volume/brightness\n\n"
+    printf "  ${C_D}(all use Super. full list: ~/.config/hypr/hyprland.conf)${C_R}\n\n"
+fi
