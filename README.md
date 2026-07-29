@@ -1,6 +1,18 @@
 <div align="center">
 
-# tabby rice
+```
+                    ╱|、
+                   (˚ˎ 。7       t a b b y   r i c e
+                    |、˜〵
+                    じしˍ,)ノ
+
+ ████████╗ █████╗ ██████╗ ██████╗ ██╗   ██╗    ██████╗ ██╗ ██████╗███████╗
+ ╚══██╔══╝██╔══██╗██╔══██╗██╔══██╗╚██╗ ██╔╝    ██╔══██╗██║██╔════╝██╔════╝
+    ██║   ███████║██████╔╝██████╔╝ ╚████╔╝     ██████╔╝██║██║     █████╗  
+    ██║   ██╔══██║██╔══██╗██╔══██╗  ╚██╔╝      ██╔══██╗██║██║     ██╔══╝  
+    ██║   ██║  ██║██████╔╝██████╔╝   ██║       ██║  ██║██║╚██████╗███████╗
+    ╚═╝   ╚═╝  ╚═╝╚═════╝ ╚═════╝    ╚═╝       ╚═╝  ╚═╝╚═╝ ╚═════╝╚══════╝
+```
 
 **a hyprland desktop that themes itself, animates its wallpapers, and reshapes its bar on a keypress**
 
@@ -182,6 +194,13 @@ Palettes: [catppuccin](https://catppuccin.com) · [tokyo night](https://github.c
 <br>
 
 <div align="center">
+
+```
+   ╱|、
+  (˚ˎ 。7
+   |、˜〵
+   じしˍ,)ノ
+```
 
 **MIT** &nbsp;·&nbsp; made by [tabby](https://tabby.beauty)
 
