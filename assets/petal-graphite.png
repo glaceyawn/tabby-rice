@@ -1,0 +1,6 @@
+# set up each look, then Shift+Print and:
+wl-paste > assets/petal-graphite.png     # petal bar, graphite, black-sand wall
+wl-paste > assets/pills-mocha.png        # theme-switch mocha; bar-switch pills top
+wl-paste > assets/ghost-tokyonight.png   # bar-switch ghost bottom + aerial city wall
+wl-paste > assets/fastfetch.png          # you already have this shot from earlier
+git add assets && git commit -m "add screenshots" && git push
