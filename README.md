@@ -1,21 +1,6 @@
 <div align="center">
 
-```
-                        ╱|、
-                        (˚ˎ 。7
-                        |、˜〵
-                        じしˍ,)ノ
-
-
-       _        _     _                  _
-      | |_ __ _| |__ | |__  _   _   _ __(_) ___ ___
-      | __/ _` | '_ \| '_ \| | | | | '__| |/ __/ _ \
-      | || (_| | |_) | |_) | |_| | | |  | | (_|  __/
-       \__\__,_|_.__/|_.__/ \__, | |_|  |_|\___\___|
-                            |___/
-```
-
-**a hyprland desktop that themes itself, animates its wallpapers, and reshapes its bar on a keypress**
+<img src="assets/banner.png" alt="tabby rice" width="800">
 
 <br>
 
