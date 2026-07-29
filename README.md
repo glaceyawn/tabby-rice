@@ -1,193 +1,85 @@
-<div align="center">
+# circuit vapor — maximalist rice
 
-<img src="assets/banner.png" alt="tabby rice" width="800">
+Palette: base `#0d0221` · pink `#ff2e88` · violet `#7b2fff` · cyan `#00f0ff` · mint `#3cf58e` · amber `#ffb454`
 
-<br>
+## file destinations
 
-`7 themes`&nbsp;&nbsp;·&nbsp;&nbsp;`4 bar styles`&nbsp;&nbsp;·&nbsp;&nbsp;`live wallpaper engine`&nbsp;&nbsp;·&nbsp;&nbsp;`one-command install`
+| file | goes to |
+|---|---|
+| `hypr/hyprland.conf` | `~/.config/hypr/hyprland.conf` |
+| `waybar/config.jsonc` | `~/.config/waybar/config.jsonc` |
+| `waybar/style.css` | `~/.config/waybar/style.css` |
+| `rofi/config.rasi` | `~/.config/rofi/config.rasi` |
+| `kitty/kitty.conf` | `~/.config/kitty/kitty.conf` |
+| `starship.toml` | `~/.config/starship.toml` |
 
-<br>
+## NixOS packages needed
 
-![Hyprland](https://img.shields.io/badge/hyprland_0.55+-cba6f7?style=for-the-badge&logo=hyprland&logoColor=1e1e2e&labelColor=181825)
-![Arch](https://img.shields.io/badge/arch-89b4fa?style=for-the-badge&logo=archlinux&logoColor=1e1e2e&labelColor=181825)
-![Fedora](https://img.shields.io/badge/fedora-a6e3a1?style=for-the-badge&logo=fedora&logoColor=1e1e2e&labelColor=181825)
-![Debian](https://img.shields.io/badge/debian-f38ba8?style=for-the-badge&logo=debian&logoColor=1e1e2e&labelColor=181825)
-![NixOS](https://img.shields.io/badge/nixos-f9e2af?style=for-the-badge&logo=nixos&logoColor=1e1e2e&labelColor=181825)
-
-</div>
-
-<br>
-
----
-
-<br>
-
-<div align="center">
-
-### the four faces
-
-</div>
-
-|  |  |
-|:---:|:---:|
-| ![petal](assets/petal-graphite.png) | ![pills](assets/pills-mocha.png) |
-| **petal** — floating islands · graphite | **pills** — bubbly capsules · mocha |
-| ![ghost](assets/ghost-tokyonight.png) | ![fetch](assets/fastfetch.png) |
-| **ghost** — the bar dissolves into the wall · tokyo night | the fastfetch splash |
-
-<br>
-
-## what makes it tick
-
-🎨 &nbsp; **one keypress, everything recolors.** Hyprland, waybar, kitty (live, no restart), rofi, mako, and starship all switch together across seven palettes — graphite, catppuccin mocha and latte, tokyo night, rosé pine, gruvbox, and nord.
-
-🖼️ &nbsp; **wallpapers follow your theme.** A rofi thumbnail grid lets you pick per-theme, global, or from everything, with transitions that ripple out from your cursor. Change theme and a matching wallpaper comes with it.
-
-📊 &nbsp; **the bar has four personalities.** Floating petal islands, bubbly pills, a flat classic bar, or ghost — no bar at all, just text drifting on the wallpaper. Top or bottom, on any monitor.
-
-🖥️ &nbsp; **a wizard sets up your monitors.** It reads your real displays, defaults each to its highest refresh rate, and asks for order, scale, and alignment. Dual setups get workspaces pinned automatically.
-
-🟢 &nbsp; **NVIDIA-smooth out of the box.** Anti-flicker settings are baked in — no hardware cursors, static borders, VRR off — so you skip the evening of chasing flicker.
-
-<br>
-
-## install
-
-```bash
-git clone https://github.com/glaceyawn/tabby-rice
-cd tabby-rice
-./install.sh
+```nix
+environment.systemPackages = with pkgs; [
+  waybar rofi-wayland kitty starship
+  dunst libnotify hyprpaper hypridle hyprlock hyprpicker
+  cliphist wl-clipboard
+  grim slurp swappy
+  brightnessctl playerctl wireplumber
+  pavucontrol networkmanagerapplet blueman
+  btop
+  papirus-icon-theme bibata-cursors
+  nerd-fonts.jetbrains-mono nerd-fonts.symbols-only
+  kdePackages.dolphin
+];
 ```
 
-The installer detects your distro and installs packages the right way for each:
+## Hyprland plugins (the efficiency stuff)
 
-| your distro | how it installs |
-|---|---|
-| Arch · CachyOS · EndeavourOS · Manjaro | `pacman`, automatically |
-| Fedora | `dnf`, automatically |
-| Debian 13+ · Ubuntu 24.10+ | `apt`, automatically |
-| NixOS | prints the config snippet to paste |
-| anything else | lists the packages, then installs the configs |
+- **hyprexpo** — Super+O for a zoomed-out workspace overview (also 4-finger swipe)
+- **hyprtrails** — pink motion trails behind moving windows
+- **hyprbars** — titlebar buttons on floating windows only
+- **borders-plus-plus** — second cyan border ring
 
-Anything you already have is skipped. Your current setup is backed up to `~/.config/rice-backup-<timestamp>/` before a single file moves. Run `./install.sh --check` first if you just want to see what's missing.
-
-<br>
-
-## the map
-
-```
-tabby-rice
-├── install.sh                      the one script you run
-└── home/
-    └── .config/
-        ├── hypr/
-        │   ├── hyprland.conf        keybinds, rules, the whole compositor
-        │   ├── monitors.conf        written by the monitor wizard
-        │   └── colors.conf          written by theme-switch
-        ├── waybar/
-        │   ├── config.jsonc         what appears on the bar
-        │   └── styles/
-        │       ├── petal.css
-        │       ├── pills.css        the four bar faces
-        │       ├── flat.css
-        │       └── ghost.css
-        ├── rofi/  kitty/  mako/  fastfetch/  fish/
-        ├── theme-engine/
-        │   ├── themes/              7 palettes — drop your own here
-        │   └── templates/
-        └── starship.toml            all 7 palettes embedded
-
-    home/.local/bin/
-        ├── theme-switch             the heart — recolors everything
-        ├── wall  wall-fetch         wallpaper picker and downloader
-        ├── bar-switch               swap bar style and position
-        ├── bar-monitor              put the bar on a chosen screen
-        └── rice-welcome             the help panel
+```nix
+wayland.windowManager.hyprland.plugins = with pkgs.hyprlandPlugins; [
+  hyprexpo hyprtrails hyprbars borders-plus-plus
+];
 ```
 
-<br>
+(home-manager path shown; if you configure Hyprland system-wide, use
+`programs.hyprland.plugins`. Pin nixpkgs-unstable so plugin ABI matches your
+Hyprland version — mismatched plugins crash the compositor on load.)
 
-## keybinds
+If you skip plugins, delete/comment the `plugin { }` block, the
+`windowrule = plugin:hyprbars...` line, and the `hyprexpo:expo` bind —
+Hyprland errors on dispatchers from unloaded plugins.
 
-Everything runs on the **Super** key (the Windows key). Press **Super + Shift + H** anytime to see this as a panel on your desktop.
+## keybind cheat sheet
 
-**the rice**
-
-| key | action |
+| bind | action |
 |---|---|
-| Super + F2 | switch theme |
-| Super + F3 | wallpaper picker (add Shift for random) |
-| Super + F4 | bar style and position (add Shift for which monitor) |
-| Super + Shift + H | open the help panel |
+| Super+B | Firefox |
+| Super+Space | rofi launcher |
+| Super+Q | close window |
+| Super+T | kitty |
+| Super+N | neovim (in kitty) |
+| Super+E | dolphin |
+| Super+V | toggle float |
+| Super+F | fullscreen (Shift = maximize) |
+| Super+Tab | rofi window switcher |
+| Super+C | clipboard history (cliphist → rofi) |
+| Super+S | dropdown terminal scratchpad |
+| Super+M | music scratchpad |
+| Super+O | hyprexpo overview |
+| Super+G | tab windows into a group |
+| Super+L | lock (hyprlock) |
+| Super+Shift+S / Print | region screenshot → clipboard |
+| Super+Print | screenshot → swappy editor |
+| Super+Shift+C | hyprpicker color picker |
+| Super+` | last workspace toggle |
+| Super+[ / ] | cycle workspaces |
+| XF86 keys | volume (wpctl) / brightness (brightnessctl) / media (playerctl) |
 
-**apps**
+## notes
 
-| key | action |
-|---|---|
-| Super + Space | app launcher |
-| Super + B / T / N / E | firefox · terminal · neovim · files |
-| Super + S | dropdown terminal |
-| Super + C | clipboard history |
-
-**windows**
-
-| key | action |
-|---|---|
-| Super + Q / V / F | close · float · fullscreen |
-| Super + arrow keys | move focus (add Shift to move the window) |
-| Super + 1-9 | switch workspace |
-
-**system**
-
-| key | action |
-|---|---|
-| Super + W | dismiss notification (Shift for all, Ctrl to restore) |
-| Super + F1 | do-not-disturb |
-| Super + L | lock screen |
-| Super + Shift + S | region screenshot |
-| media keys | volume and brightness |
-
-<br>
-
-## make it yours
-
-**a new theme** — drop a 14-line palette file in `theme-engine/themes/yours.sh`, add a matching `[palettes.yours]` block to `starship.toml`, and it shows up in the switcher.
-
-**a bar tweak** — edit the files in `waybar/styles/`, never `style.css` (that one gets overwritten every time you switch styles).
-
-**per-theme wallpapers** — drop images into `~/Pictures/wallpapers/<theme>/` and they join the rotation.
-
-<br>
-
-<details>
-<summary><b>how the theme engine actually works</b></summary>
-
-<br>
-
-Every app reads its colors from a small generated include file. One script, `theme-switch`, is the only thing that writes them. When you switch, it regenerates every include from a palette, renders mako from a template, flips starship's palette, live-recolors each open kitty over its control socket, pulls a matching wallpaper, and reloads the compositor. That is why the change is instant and total instead of app-by-app. Adding a theme is genuinely just the two files above — the engine scans the folder.
-
-</details>
-
-<br>
-
-## credits
-
-Wallpapers are fetched by `wall-fetch` from these collections (not redistributed here — each keeps its own license):
-[orangci](https://github.com/orangci/walls-catppuccin-mocha) · [zhichaoh](https://github.com/zhichaoh/catppuccin-wallpapers) · [dharmx](https://github.com/dharmx/walls) · [rose-pine](https://github.com/rose-pine/wallpapers) · [AngelJumbo](https://github.com/AngelJumbo/gruvbox-wallpapers) · [linuxdotexe](https://github.com/linuxdotexe/nordic-wallpapers) · [D3Ext](https://github.com/D3Ext/aesthetic-wallpapers)
-
-Palettes: [catppuccin](https://catppuccin.com) · [tokyo night](https://github.com/folke/tokyonight.nvim) · [rosé pine](https://rosepinetheme.com) · [gruvbox](https://github.com/morhetz/gruvbox) · [nord](https://nordtheme.com)
-
-<br>
-
-<div align="center">
-
-```
-   ╱|、
-  (˚ˎ 。7
-   |、˜〵
-   じしˍ,)ノ
-```
-
-**MIT** &nbsp;·&nbsp; made by [tabby](https://tabby.beauty)
-
-</div>
+- HDMI-A-5 is placed at `3440x180` (vertically centered next to the ultrawide) — tweak the offset if your physical layout differs.
+- Waybar battery/backlight modules just hide themselves on the desktop; same configs work on the T14.
+- The spinning border gradient is the `borderangle` loop animation — if it bothers your GPU, delete that one line.
+- kitty `cursor_trail` needs kitty ≥ 0.37 (fine on unstable).
