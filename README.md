@@ -1,5 +1,7 @@
 # circuit vapor — maximalist rice
 
+works currently for arch distros, linux mint and other updated apt distros, fedora, and nixos. (others work too just weird)
+
 Palette: base `#0d0221` · pink `#ff2e88` · violet `#7b2fff` · cyan `#00f0ff` · mint `#3cf58e` · amber `#ffb454`
 
 ## file destinations
