@@ -1,0 +1,73 @@
+#!/usr/bin/env bash
+# rice-shots — capture nice screenshots of each theme for your gallery/repo
+#
+# walks you through each theme + bar combo. for each one it sets the look,
+# then waits for YOU to arrange windows and press Enter — so every shot looks
+# intentional, not just a bare desktop. restores your setup when done.
+#
+# usage:  rice-shots            → saves into ./assets (run from your repo)
+#         rice-shots ~/pics     → saves into a folder you choose
+set -u
+
+BIN="$HOME/.local/bin"
+TE="$HOME/.config/theme-engine"
+OUT="${1:-$PWD/assets}"
+
+# ── sanity checks ──
+command -v grim >/dev/null || { echo "grim isn't installed — can't screenshot"; exit 1; }
+[ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ] || { echo "run this from a terminal inside Hyprland"; exit 1; }
+mkdir -p "$OUT" || { echo "can't create $OUT"; exit 1; }
+
+# ── remember current setup to restore later ──
+ORIG_THEME="$(cat "$TE/current" 2>/dev/null || echo graphite)"
+ORIG_BAR="petal"; ORIG_POS="top"
+[ -f "$TE/bar" ] && . "$TE/bar" && ORIG_BAR="${CUR_STYLE:-petal}" && ORIG_POS="${CUR_POS:-top}"
+
+# ── the shots: theme · bar · position · filename ──
+# these four are what the README gallery uses; add/remove lines freely
+SHOTS=(
+    "graphite   petal  top     petal-graphite"
+    "mocha      pills  top     pills-mocha"
+    "tokyonight ghost  bottom  ghost-tokyonight"
+)
+
+cyan="\033[38;5;110m"; grey="\033[2m"; green="\033[38;5;108m"; rst="\033[0m"
+total=$(( ${#SHOTS[@]} + 1 ))   # +1 for the fastfetch shot
+
+echo
+echo -e "${cyan}rice-shots${rst} — saving to ${grey}$OUT${rst}"
+echo -e "${grey}for each theme: arrange your windows, then press Enter to capture."
+echo -e "press 's' then Enter to skip one, or Ctrl-C to stop.${rst}"
+echo
+
+i=0
+for entry in "${SHOTS[@]}"; do
+    i=$((i+1))
+    read -r theme bar pos name <<< "$entry"
+    echo -e "${cyan}[$i/$total]${rst} $theme · $bar bar ($pos)"
+    "$BIN/theme-switch" "$theme"      >/dev/null 2>&1
+    "$BIN/bar-switch"   "$bar" "$pos" >/dev/null 2>&1
+    sleep 1.5   # let the theme + wallpaper transition settle
+    printf "      arrange your windows, then Enter to shoot (s = skip): "
+    read -r key
+    [ "$key" = "s" ] && { echo -e "      ${grey}skipped${rst}"; continue; }
+    grim "$OUT/$name.png" && echo -e "      ${green}saved${rst} $name.png"
+done
+
+# ── fastfetch shot ──
+i=$((i+1))
+echo -e "${cyan}[$i/$total]${rst} fastfetch"
+echo -e "      ${grey}open a clean terminal running 'fastfetch', size it nicely${rst}"
+printf "      then Enter to shoot (s = skip): "
+read -r key
+[ "$key" != "s" ] && { grim "$OUT/fastfetch.png" && echo -e "      ${green}saved${rst} fastfetch.png"; }
+
+# ── restore ──
+echo
+echo -e "${grey}restoring your setup ($ORIG_THEME · $ORIG_BAR $ORIG_POS)...${rst}"
+"$BIN/theme-switch" "$ORIG_THEME"          >/dev/null 2>&1
+"$BIN/bar-switch"   "$ORIG_BAR" "$ORIG_POS" >/dev/null 2>&1
+
+echo
+echo -e "${green}done${rst} — shots in $OUT:"
+for f in "$OUT"/*.png; do [ -f "$f" ] && echo "  $(basename "$f")  ($(du -h "$f" | cut -f1))"; done
