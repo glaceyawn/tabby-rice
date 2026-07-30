@@ -149,7 +149,7 @@ tabby-rice
         ├── waybar/
         │   ├── config.jsonc         what appears on the bar
         │   └── styles/              the four bar faces
-        ├── rofi/  kitty/  mako/  fastfetch/  fish/  sddm/  dolphin/
+        ├── rofi/  kitty/  mako/  fastfetch/  fish/  sddm/  pcmanfm-qt/
         ├── theme-engine/
         │   ├── themes/              7 palettes — drop your own here
         │   └── templates/

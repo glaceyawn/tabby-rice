@@ -96,18 +96,18 @@ PKGS_ARCH=(hyprland waybar rofi kitty starship mako libnotify fastfetch fish
            brightnessctl playerctl pipewire pipewire-pulse pipewire-audio wireplumber pavucontrol sof-firmware
            networkmanager network-manager-applet blueman btop papirus-icon-theme
            ttf-jetbrains-mono-nerd ttf-nerd-fonts-symbols noto-fonts noto-fonts-emoji
-           hyprlock hypridle sddm qt6-svg qt6-declarative qt6ct kvantum dolphin awww python)
+           hyprlock hypridle sddm qt6-svg qt6-declarative qt6ct kvantum pcmanfm-qt awww python)
 PKGS_FEDORA=(hyprland waybar rofi kitty starship mako libnotify fastfetch fish
              hyprpicker cliphist wl-clipboard grim slurp swappy
              brightnessctl playerctl pipewire pipewire-pulseaudio wireplumber pavucontrol alsa-sof-firmware
              NetworkManager network-manager-applet blueman btop papirus-icon-theme
              jetbrains-mono-fonts google-noto-emoji-fonts
-             hyprlock hypridle sddm qt6-qtsvg qt6-qtdeclarative qt6-qtquickcontrols2 qt6ct kvantum dolphin python3)
+             hyprlock hypridle sddm qt6-qtsvg qt6-qtdeclarative qt6-qtquickcontrols2 qt6ct kvantum pcmanfm-qt python3)
 PKGS_DEBIAN=(hyprland waybar rofi kitty mako-notifier libnotify-bin fastfetch fish
              cliphist wl-clipboard grim slurp brightnessctl playerctl
              wireplumber pavucontrol blueman btop papirus-icon-theme
              fonts-jetbrains-mono fonts-noto-color-emoji
-             hyprlock hypridle sddm qt6ct dolphin python3)
+             hyprlock hypridle sddm qt6ct pcmanfm-qt python3)
 
 # optional bundles: label|arch pkgs|debian pkgs|fedora pkgs
 BUNDLES=(
@@ -174,7 +174,7 @@ environment.systemPackages = with pkgs; [
   pavucontrol networkmanagerapplet blueman btop
   papirus-icon-theme bibata-cursors
   nerd-fonts.jetbrains-mono nerd-fonts.symbols-only
-  kdePackages.dolphin
+  pcmanfm-qt
 ];
 # remove if present: dunst, hyprpaper (conflict with mako / awww)
 NIX
@@ -686,7 +686,14 @@ install_configs() {
         cp -f "$f" "$HOME/$rel"
     done < <(find home -type f)
     chmod +x "$HOME"/.local/bin/* 2>/dev/null
-    good "installed configs for: hyprland waybar rofi kitty mako fastfetch fish starship hyprlock dolphin"
+    good "installed configs for: hyprland waybar rofi kitty mako fastfetch fish starship hyprlock pcmanfm-qt"
+
+    # optional: papirus-folders (AUR) lets theme-switch tint folder icons to
+    # the accent color. install it quietly if we're on arch; skip if it fails.
+    if [ "$DISTRO" = "arch" ] && ! command -v papirus-folders >/dev/null 2>&1; then
+        note "installing papirus-folders (tints folder icons to your theme)..."
+        aur_install papirus-folders >/dev/null 2>&1 || note "papirus-folders skipped — folders will use plain Papirus-Dark"
+    fi
 
     # CRITICAL: on Hyprland 0.55+, a fresh install is a "Lua root" — Hyprland
     # autogenerates a hyprland.lua and loads THAT instead of our hyprland.conf,

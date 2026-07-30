@@ -138,7 +138,7 @@ if command -v "$WPP" >/dev/null && [ -d "$WALLS/$THEME" ]; then
     [ -n "$W" ] && "$WPP" img "$W" --transition-type grow --transition-pos center --transition-duration 1.2 --transition-fps 180
 fi
 
-# ── qt6ct / dolphin color scheme ────────────
+# ── qt6ct color scheme (themes all Qt apps) ─
 mkdir -p "$HOME/.config/qt6ct/colors"
 cat > "$HOME/.config/qt6ct/colors/tabby-dark.conf" << EOF
 [ColorScheme]
@@ -146,13 +146,101 @@ active_colors=#ff${FG}, #ff${BG1}, #ff${BG2}, #ff${BG1}, #ff${BG}, #ff${BG1}, #f
 disabled_colors=#ff${MUTED}, #ff${BG1}, #ff${BG2}, #ff${BG1}, #ff${BG}, #ff${BG1}, #ff${MUTED}, #ffffffff, #ff${MUTED}, #ff${BG}, #ff${BG}, #ff${BG}, #ff${MUTED}, #ff${MUTED}, #ff${ACCENT}, #ff${RED}, #ff${BG1}, #ff000000, #ff${BG1}, #ff${MUTED}, #80808080
 inactive_colors=#ff${FG}, #ff${BG1}, #ff${BG2}, #ff${BG1}, #ff${BG}, #ff${BG1}, #ff${FG}, #ffffffff, #ff${FG}, #ff${BG}, #ff${BG}, #ff${BG}, #ff${ACCENT}, #ff${BG}, #ff${ACCENT}, #ff${RED}, #ff${BG1}, #ff000000, #ff${BG1}, #ff${FG}, #80808080
 EOF
-# kdeglobals icon override (kept — this part works)
+# kdeglobals — full color scheme for Qt/KDE apps. hex→"r,g,b".
+h2r() { printf '%d,%d,%d' "0x${1:0:2}" "0x${1:2:2}" "0x${1:4:2}"; }
 cat > "$HOME/.config/kdeglobals" << EOF
-[Icons]
-Theme=Papirus-Dark
 [General]
 ColorScheme=tabby-dark
+Name=tabby-dark
+
+[Icons]
+Theme=Papirus-Dark
+
+[KDE]
+SingleClick=false
+
+[Colors:View]
+BackgroundNormal=$(h2r "$BG1")
+BackgroundAlternate=$(h2r "$BG2")
+ForegroundNormal=$(h2r "$FG")
+ForegroundInactive=$(h2r "$MUTED")
+DecorationFocus=$(h2r "$ACCENT")
+DecorationHover=$(h2r "$ACCENT")
+
+[Colors:Window]
+BackgroundNormal=$(h2r "$BG")
+BackgroundAlternate=$(h2r "$BG1")
+ForegroundNormal=$(h2r "$FG")
+ForegroundInactive=$(h2r "$MUTED")
+DecorationFocus=$(h2r "$ACCENT")
+
+[Colors:Selection]
+BackgroundNormal=$(h2r "$ACCENT")
+ForegroundNormal=$(h2r "$BG")
+
+[Colors:Button]
+BackgroundNormal=$(h2r "$BG2")
+ForegroundNormal=$(h2r "$FG")
+DecorationFocus=$(h2r "$ACCENT")
+
+[Colors:Tooltip]
+BackgroundNormal=$(h2r "$BG1")
+ForegroundNormal=$(h2r "$FG")
 EOF
+
+# ── PCManFM-Qt (file manager) ───────────────
+# it reads the qt6ct palette above for its view, but also has its own
+# settings for the icon theme + view. regenerate so it matches the theme.
+mkdir -p "$HOME/.config/pcmanfm-qt/default"
+cat > "$HOME/.config/pcmanfm-qt/default/settings.conf" << EOF
+[Behavior]
+SingleClick=false
+ConfirmDelete=true
+
+[Desktop]
+WallpaperMode=0
+
+[FolderView]
+Mode=1
+ShowHidden=false
+
+[System]
+FallbackIconThemeName=Papirus-Dark
+Terminal=kitty
+Archiver=
+
+[Window]
+AlwaysShowTabs=false
+PathBarButtons=true
+EOF
+
+# folder icon accent: papirus-folders can't touch the system icon dir without
+# sudo (bad for a per-switch script), so we keep a USER copy of Papirus-Dark
+# in ~/.local/share/icons and recolor that — no password prompts.
+if command -v papirus-folders >/dev/null 2>&1; then
+    USERICONS="$HOME/.local/share/icons"
+    if [ ! -d "$USERICONS/Papirus-Dark" ] && [ -d /usr/share/icons/Papirus-Dark ]; then
+        mkdir -p "$USERICONS"
+        cp -r /usr/share/icons/Papirus-Dark "$USERICONS/" 2>/dev/null
+        cp -r /usr/share/icons/Papirus "$USERICONS/" 2>/dev/null  # base it inherits from
+    fi
+    # map each theme to its closest papirus folder color (matches the accent)
+    case "$THEME" in
+        graphite)   PF=bluegrey ;;
+        mocha)      PF=violet ;;
+        latte)      PF=violet ;;
+        tokyonight) PF=blue ;;
+        rosepine)   PF=violet ;;
+        gruvbox)    PF=orange ;;
+        nord)       PF=cyan ;;
+        *)          PF=bluegrey ;;
+    esac
+    # recolor the USER copy (no sudo needed since it's in $HOME)
+    papirus-folders -C "$PF" --theme Papirus-Dark >/dev/null 2>&1
+    # refresh the icon cache so apps pick it up
+    command -v gtk-update-icon-cache >/dev/null 2>&1 && \
+        gtk-update-icon-cache -f "$USERICONS/Papirus-Dark" >/dev/null 2>&1 || true
+fi
 
 # ── reload the world ────────────────────────
 echo "$THEME" > "$STATE"

@@ -66,13 +66,12 @@
     brightnessctl playerctl wireplumber pavucontrol
     networkmanagerapplet blueman btop
     papirus-icon-theme bibata-cursors
-    kdePackages.dolphin kdePackages.qtsvg
+    pcmanfm-qt kdePackages.qtsvg
     libsForQt5.qt5ct qt6ct kdePackages.qtstyleplugin-kvantum
     python3
   ];
 
-  # make Qt apps (Dolphin) use qt6ct theming — this is the piece that
-  # actually gets Dolphin to pick up the dark theme + Papirus icons
+  # make Qt apps (PCManFM-Qt, etc.) use qt6ct theming
   qt = {
     enable = true;
     platformTheme = "qt6ct";
