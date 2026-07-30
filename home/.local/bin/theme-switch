@@ -1,0 +1,162 @@
+#!/usr/bin/env bash
+# theme-switch — one command, every app re-themed
+# usage: theme-switch            (rofi picker)
+#        theme-switch <name>     (direct)
+#        theme-switch --restore  (on login, reapply saved theme)
+set -u
+WPP="$(command -v awww || command -v swww)" || { notify-send "wallpaper" "awww/swww not installed"; exit 1; }
+TE="$HOME/.config/theme-engine"
+STATE="$TE/current"
+WALLS="$HOME/Pictures/wallpapers"
+
+pick() {
+    printf '%b\n' \
+        "󰤄  graphite" \
+        "󰄛  mocha" \
+        "󰄛  latte" \
+        "󰅆  tokyonight" \
+        "󱎂  rosepine" \
+        "󰈸  gruvbox" \
+        "󰜗  nord" \
+    | rofi -dmenu -p "󰏘 theme" -i | awk '{print $2}'
+}
+
+case "${1:-}" in
+    --restore) THEME="$(cat "$STATE" 2>/dev/null || echo graphite)" ;;
+    "")        THEME="$(pick)"; [ -z "${THEME:-}" ] && exit 0 ;;
+    *)         THEME="$1" ;;
+esac
+
+SRC="$TE/themes/$THEME.sh"
+[ -f "$SRC" ] || { notify-send -a theme "theme" "no such theme: $THEME"; exit 1; }
+. "$SRC"
+
+# ── hyprland ────────────────────────────────
+cat > "$HOME/.config/hypr/colors.conf" << EOF
+\$bg     = rgba(${BG}ff)
+\$bg1    = rgba(${BG1}ff)
+\$bg2    = rgba(${BG2}ff)
+\$fg     = rgba(${FG}ff)
+\$muted  = rgba(${MUTED}ff)
+\$accent = rgba(${ACCENT}ff)
+\$red    = rgba(${RED}ff)
+EOF
+
+# ── hyprlock (needs bare hex for pango spans too) ──
+cat > "$HOME/.config/hypr/hyprlock-colors.conf" << EOF
+\$bg     = rgba(${BG}ff)
+\$bg1    = rgba(${BG1}ff)
+\$fg     = rgba(${FG}ff)
+\$muted  = rgba(${MUTED}ff)
+\$accent = rgba(${ACCENT}ff)
+\$green  = rgba(${GREEN}ff)
+\$red    = rgba(${RED}ff)
+\$MUTEDHEX = ${MUTED}
+\$REDHEX = ${RED}
+EOF
+
+# ── waybar ──────────────────────────────────
+cat > "$HOME/.config/waybar/colors.css" << EOF
+@define-color bg      #${BG};
+@define-color bg1     #${BG1};
+@define-color bg2     #${BG2};
+@define-color fg      #${FG};
+@define-color muted   #${MUTED};
+@define-color accent  #${ACCENT};
+@define-color red     #${RED};
+@define-color green   #${GREEN};
+@define-color yellow  #${YELLOW};
+@define-color blue    #${BLUE};
+@define-color magenta #${MAGENTA};
+@define-color cyan    #${CYAN};
+EOF
+
+# ── kitty ───────────────────────────────────
+cat > "$HOME/.config/kitty/colors.conf" << EOF
+foreground #${FG}
+background #${BG}
+selection_foreground #${BG}
+selection_background #${ACCENT}
+cursor #${FG}
+cursor_text_color #${BG}
+url_color #${ACCENT}
+active_border_color #${ACCENT}
+inactive_border_color #${BG2}
+active_tab_background #${ACCENT}
+active_tab_foreground #${BG}
+inactive_tab_background #${BG1}
+inactive_tab_foreground #${MUTED}
+tab_bar_background #${BG}
+visual_bell_color #${BG2}
+color0  #${BG2}
+color8  #${MUTED}
+color1  #${RED}
+color9  #${RED}
+color2  #${GREEN}
+color10 #${GREEN}
+color3  #${YELLOW}
+color11 #${YELLOW}
+color4  #${BLUE}
+color12 #${BLUE}
+color5  #${MAGENTA}
+color13 #${MAGENTA}
+color6  #${CYAN}
+color14 #${CYAN}
+color7  #${FG}
+color15 #${FG}
+EOF
+# live-reload every running kitty instance
+for sock in /tmp/kitty-*; do
+    [ -S "$sock" ] && kitty @ --to "unix:$sock" set-colors --all "$HOME/.config/kitty/colors.conf" 2>/dev/null
+done
+
+# ── rofi ────────────────────────────────────
+cat > "$HOME/.config/rofi/colors.rasi" << EOF
+* {
+    bg0:    #${BG}f2;
+    bg1:    #${BG1};
+    bg2:    #${BG2};
+    fg0:    #${FG};
+    muted:  #${MUTED};
+    accent: #${ACCENT};
+    red:    #${RED};
+}
+EOF
+
+# ── mako (render template) ──────────────────
+sed -e "s/{{BG}}/$BG/g"   -e "s/{{BG1}}/$BG1/g" -e "s/{{BG2}}/$BG2/g" \
+    -e "s/{{FG}}/$FG/g"   -e "s/{{MUTED}}/$MUTED/g" \
+    -e "s/{{ACCENT}}/$ACCENT/g" -e "s/{{RED}}/$RED/g" \
+    "$TE/templates/mako.tpl" > "$HOME/.config/mako/config"
+
+# ── starship (flip palette) ─────────────────
+sed -i "s/^palette = .*/palette = \"$THEME\"/" "$HOME/.config/starship.toml"
+
+# ── per-theme wallpaper, if a folder exists ─
+if command -v "$WPP" >/dev/null && [ -d "$WALLS/$THEME" ]; then
+    W="$(find "$WALLS/$THEME" -type f \( -name '*.png' -o -name '*.jpg' -o -name '*.jpeg' -o -name '*.webp' \) | shuf -n1)"
+    [ -n "$W" ] && "$WPP" img "$W" --transition-type grow --transition-pos center --transition-duration 1.2 --transition-fps 180
+fi
+
+# ── qt6ct / dolphin color scheme ────────────
+mkdir -p "$HOME/.config/qt6ct/colors"
+cat > "$HOME/.config/qt6ct/colors/tabby-dark.conf" << EOF
+[ColorScheme]
+active_colors=#ff${FG}, #ff${BG1}, #ff${BG2}, #ff${BG1}, #ff${BG}, #ff${BG1}, #ff${FG}, #ffffffff, #ff${FG}, #ff${BG}, #ff${BG}, #ff${BG}, #ff${ACCENT}, #ff${BG}, #ff${ACCENT}, #ff${RED}, #ff${BG1}, #ff000000, #ff${BG1}, #ff${FG}, #80808080
+disabled_colors=#ff${MUTED}, #ff${BG1}, #ff${BG2}, #ff${BG1}, #ff${BG}, #ff${BG1}, #ff${MUTED}, #ffffffff, #ff${MUTED}, #ff${BG}, #ff${BG}, #ff${BG}, #ff${MUTED}, #ff${MUTED}, #ff${ACCENT}, #ff${RED}, #ff${BG1}, #ff000000, #ff${BG1}, #ff${MUTED}, #80808080
+inactive_colors=#ff${FG}, #ff${BG1}, #ff${BG2}, #ff${BG1}, #ff${BG}, #ff${BG1}, #ff${FG}, #ffffffff, #ff${FG}, #ff${BG}, #ff${BG}, #ff${BG}, #ff${ACCENT}, #ff${BG}, #ff${ACCENT}, #ff${RED}, #ff${BG1}, #ff000000, #ff${BG1}, #ff${FG}, #80808080
+EOF
+# kdeglobals icon override (kept — this part works)
+cat > "$HOME/.config/kdeglobals" << EOF
+[Icons]
+Theme=Papirus-Dark
+[General]
+ColorScheme=tabby-dark
+EOF
+
+# ── reload the world ────────────────────────
+echo "$THEME" > "$STATE"
+hyprctl reload >/dev/null 2>&1
+makoctl reload >/dev/null 2>&1
+pkill waybar; waybar >/dev/null 2>&1 & disown
+notify-send -a theme "theme" "switched to $THEME"

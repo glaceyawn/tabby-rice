@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+# wall-fetch — downloads the curated theme wallpaper set into ~/Pictures/wallpapers
+# safe to re-run; skips files that already exist
+set -u
+W="$HOME/Pictures/wallpapers"
+mkdir -p "$W"/graphite "$W"/mocha "$W"/latte "$W"/tokyonight "$W"/rosepine "$W"/gruvbox "$W"/nord "$W"/global
+
+n=0; ok=0
+dl() {
+    n=$((n+1))
+    [ -f "$W/$1" ] && { ok=$((ok+1)); return; }
+    if curl -sL --fail -o "$W/$1" "https://raw.githubusercontent.com/$2"; then
+        ok=$((ok+1)); echo "  ✓ $1"
+    else
+        echo "  ✗ FAILED $1"
+    fi
+}
+
+echo "── graphite (monochrome photography · dharmx/walls)"
+dl graphite/black-sand-waves.png "dharmx/walls/main/monochrome/a_black_sand_with_white_foamy_waves.png"
+dl graphite/mono-clouds.jpg      "dharmx/walls/main/monochrome/a_black_and_white_photo_of_clouds.jpg"
+dl graphite/mono-hill.jpg        "dharmx/walls/main/monochrome/a_black_and_white_image_of_a_hill.jpg"
+dl graphite/bird-mountain.jpg    "dharmx/walls/main/monochrome/a_bird_flying_over_a_mountain.jpg"
+dl graphite/water-white-sky.jpg  "dharmx/walls/main/monochrome/a_body_of_water_with_a_white_sky.jpg"
+
+echo "── mocha (orangci/walls-catppuccin-mocha)"
+dl mocha/beach-path.jpg     "orangci/walls-catppuccin-mocha/master/beach-path.jpg"
+dl mocha/dark-forest.jpg    "orangci/walls-catppuccin-mocha/master/dark-forest.jpg"
+dl mocha/excalibur-lake.jpg "orangci/walls-catppuccin-mocha/master/excalibur-lake.jpg"
+dl mocha/cottages-river.png "orangci/walls-catppuccin-mocha/master/cottages-river.png"
+dl mocha/asian-village.png  "orangci/walls-catppuccin-mocha/master/asian-village.png"
+
+echo "── latte (zhichaoh/catppuccin-wallpapers landscapes)"
+dl latte/tropic-island-day.jpg     "zhichaoh/catppuccin-wallpapers/main/landscapes/tropic_island_day.jpg"
+dl latte/tropic-island-morning.jpg "zhichaoh/catppuccin-wallpapers/main/landscapes/tropic_island_morning.jpg"
+dl latte/clearday.jpg              "zhichaoh/catppuccin-wallpapers/main/landscapes/Clearday.jpg"
+dl latte/cloudsday.jpg             "zhichaoh/catppuccin-wallpapers/main/landscapes/Cloudsday.jpg"
+
+echo "── tokyonight (dharmx aerials + night cities)"
+dl tokyonight/aerial-city-night.jpg   "dharmx/walls/main/aerial/aerial_view_of_a_city_at_night.jpg"
+dl tokyonight/aerial-city-night-2.jpg "dharmx/walls/main/aerial/aerial_view_of_a_city_at_night_01.jpg"
+dl tokyonight/city-on-water.jpg       "orangci/walls-catppuccin-mocha/master/city-on-water.jpg"
+dl tokyonight/city-harbor.png         "orangci/walls-catppuccin-mocha/master/city-harbor.png"
+dl tokyonight/tokyo-simplistic.jpg    "D3Ext/aesthetic-wallpapers/main/images/TokyoSimplistic.jpg"
+
+echo "── rosepine (rose-pine/wallpapers photography)"
+dl rosepine/moon.jpg           "rose-pine/wallpapers/main/photography/kainoa-kanter/moon.jpg"
+dl rosepine/ocean-drone.jpg    "rose-pine/wallpapers/main/photography/kainoa-kanter/ocean-drone-1.jpg"
+dl rosepine/bay.jpg            "rose-pine/wallpapers/main/photography/kainoa-kanter/bay.jpg"
+dl rosepine/roses.jpg          "rose-pine/wallpapers/main/photography/kainoa-kanter/roses.jpg"
+dl rosepine/point-overhead.jpg "rose-pine/wallpapers/main/photography/kainoa-kanter/point-overhead.jpg"
+
+echo "── gruvbox (AngelJumbo/gruvbox-wallpapers photography)"
+dl gruvbox/white-mountain.jpg "AngelJumbo/gruvbox-wallpapers/main/wallpapers/photography/White-Mountain.jpg"
+dl gruvbox/autumn-leaf.jpg    "AngelJumbo/gruvbox-wallpapers/main/wallpapers/photography/Excl_Autumn_Leaf.jpg"
+dl gruvbox/beach.jpg          "AngelJumbo/gruvbox-wallpapers/main/wallpapers/photography/beach.jpg"
+dl gruvbox/autumn-road.jpg    "AngelJumbo/gruvbox-wallpapers/main/wallpapers/photography/aaron-burden-X3Um-nwpuWs.jpg"
+
+echo "── nord (linuxdotexe/nordic-wallpapers)"
+dl nord/arctic-landscape.png "linuxdotexe/nordic-wallpapers/master/wallpapers/arctic-landscape.png"
+dl nord/misty-mountains.jpg  "linuxdotexe/nordic-wallpapers/master/wallpapers/misty_mountains.jpg"
+dl nord/nord-lake.png        "linuxdotexe/nordic-wallpapers/master/wallpapers/nord_lake.png"
+dl nord/mountain-jaws.jpg    "linuxdotexe/nordic-wallpapers/master/wallpapers/mountain_jaws.jpg"
+dl nord/nord-valley.png      "linuxdotexe/nordic-wallpapers/master/wallpapers/nord_valley.png"
+
+echo "── global (works with anything)"
+dl global/iceberg.jpg       "dharmx/walls/main/mountain/a_iceberg_in_the_water_with_mountains_in_the_background.jpg"
+dl global/canyon-sunset.jpg "dharmx/walls/main/mountain/a_large_canyon_with_a_sunset_with_Badlands_National_Park_in_the_background.jpg"
+dl global/flower-field.jpg  "orangci/walls-catppuccin-mocha/master/flower-field.jpg"
+dl global/yosemite.png      "zhichaoh/catppuccin-wallpapers/main/landscapes/yosemite.png"
+dl global/ocean-drone-2.jpg "rose-pine/wallpapers/main/photography/kainoa-kanter/ocean-drone-2.jpg"
+
+echo
+echo "done: $ok/$n in $W (~135 MB total)"

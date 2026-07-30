@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+# rice-shots — automated screenshot tour for the repo gallery
+# cycles themes + bar styles, grabs a grim shot of each into assets/
+#
+# usage: rice-shots [output_dir]   (default: current dir /assets)
+#        run this from INSIDE Hyprland. it will change your theme/bar/wallpaper
+#        several times, then restore your original setup when done.
+set -u
+
+OUT="${1:-$PWD/assets}"
+mkdir -p "$OUT"
+
+TE="$HOME/.config/theme-engine"
+BIN="$HOME/.local/bin"
+
+# remember what you had so we can restore it
+ORIG_THEME="$(cat "$TE/current" 2>/dev/null || echo graphite)"
+ORIG_BAR="petal"; ORIG_POS="top"
+[ -f "$TE/bar" ] && . "$TE/bar" && ORIG_BAR="${CUR_STYLE:-petal}" && ORIG_POS="${CUR_POS:-top}"
+
+command -v grim >/dev/null || { echo "grim not installed"; exit 1; }
+[ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ] || { echo "run this from inside Hyprland"; exit 1; }
+
+SETTLE=2.5   # seconds to let theme/wallpaper transitions finish before the shot
+
+shot() {  # theme  barstyle  barpos  outfile  [wallpaper-folder]
+    local theme="$1" bar="$2" pos="$3" file="$4" wall="${5:-$1}"
+    echo "  → $theme · $bar $pos → $(basename "$file")"
+    "$BIN/theme-switch" "$theme"        >/dev/null 2>&1
+    "$BIN/bar-switch"   "$bar" "$pos"   >/dev/null 2>&1
+    # pick a nice wallpaper from that theme's folder if it exists
+    if [ -d "$HOME/Pictures/wallpapers/$wall" ]; then
+        "$BIN/wall" "$wall" >/dev/null 2>&1 &
+        # wall opens a picker; instead set directly:
+        kill %% 2>/dev/null
+        local w
+        w="$(find "$HOME/Pictures/wallpapers/$wall" -type f \( -name '*.png' -o -name '*.jpg' -o -name '*.jpeg' -o -name '*.webp' \) 2>/dev/null | shuf -n1)"
+        [ -n "$w" ] && { awww img "$w" --transition-type none 2>/dev/null || swww img "$w" --transition-type none 2>/dev/null; }
+    fi
+    sleep "$SETTLE"
+    grim "$file"
+}
+
+echo "rice-shots → $OUT"
+echo "(your setup will be restored when this finishes)"
+echo
+
+# the four the README expects, plus one per remaining theme for a full showcase
+shot graphite   petal top    "$OUT/petal-graphite.png"
+shot mocha      pills top    "$OUT/pills-mocha.png"
+shot tokyonight ghost bottom "$OUT/ghost-tokyonight.png"
+shot latte      flat  top    "$OUT/flat-latte.png"
+shot rosepine   petal top    "$OUT/petal-rosepine.png"
+shot gruvbox    pills top    "$OUT/pills-gruvbox.png"
+shot nord       petal top    "$OUT/petal-nord.png"
+
+# restore
+echo
+echo "restoring your setup: $ORIG_THEME · $ORIG_BAR $ORIG_POS"
+"$BIN/theme-switch" "$ORIG_THEME"          >/dev/null 2>&1
+"$BIN/bar-switch"   "$ORIG_BAR" "$ORIG_POS" >/dev/null 2>&1
+
+echo
+echo "done. shots in $OUT:"
+for f in "$OUT"/*.png; do
+    [ -f "$f" ] && printf "  %-28s %s\n" "$(basename "$f")" "$(du -h "$f" | cut -f1)"
+done
+echo
+echo "note: for the fastfetch shot, open a clean fullscreen kitty and run:  grim $OUT/fastfetch.png"

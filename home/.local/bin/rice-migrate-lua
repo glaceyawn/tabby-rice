@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+# rice-migrate-lua — convert the hyprland.conf to the new Lua format
+#
+# Hyprland 0.55 deprecated the .conf (hyprlang) format in favor of Lua.
+# .conf still works today, but will be removed in a future release.
+# This wraps the community hyprconf2lua converter and keeps a backup.
+set -u
+CFG="$HOME/.config/hypr/hyprland.conf"
+LUA="$HOME/.config/hypr/hyprland.lua"
+
+[ -f "$CFG" ] || { echo "no hyprland.conf found at $CFG"; exit 1; }
+
+if [ -f "$LUA" ]; then
+    echo "hyprland.lua already exists — Hyprland will use it instead of .conf"
+    echo "delete it to fall back to .conf, or re-run to overwrite."
+    printf "overwrite? [y/N] "; read -r a; [ "$a" = "y" ] || exit 0
+fi
+
+echo "converting $CFG → hyprland.lua ..."
+if command -v hyprconf2lua >/dev/null 2>&1; then
+    hyprconf2lua "$CFG" -o "$LUA"
+elif command -v pipx >/dev/null 2>&1; then
+    pipx run hyprconf2lua "$CFG" -o "$LUA"
+elif command -v python3 >/dev/null 2>&1; then
+    python3 -m pip install --user hyprconf2lua >/dev/null 2>&1 &&
+    python3 -m hyprconf2lua "$CFG" -o "$LUA" ||
+    { echo "couldn't install hyprconf2lua. get it from:"; echo "  https://github.com/Prateek-squadron/hyprconf2lua"; exit 1; }
+else
+    echo "need python3 or pipx. converter: https://github.com/Prateek-squadron/hyprconf2lua"
+    exit 1
+fi
+
+echo
+echo "done → $LUA"
+echo "review any '-- TODO' lines it left, then restart Hyprland."
+echo "your original .conf is untouched; delete hyprland.lua to revert."

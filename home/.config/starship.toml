@@ -1,0 +1,194 @@
+# STARSHIP — graphite, no powerline backgrounds
+"$schema" = 'https://starship.rs/config-schema.json'
+
+add_newline = true
+command_timeout = 1500
+palette = "graphite"
+
+format = """
+$username$directory$git_branch$git_status$git_metrics$nix_shell$rust$nodejs$python$golang$lua$c$package$fill$cmd_duration$jobs$time
+$character"""
+
+[fill]
+symbol = " "
+
+[username]
+show_always = false
+style_user = "fg:accent bold"
+style_root = "fg:red bold"
+format = '[$user]($style) '
+
+[directory]
+style = "fg:accent bold"
+read_only_style = "fg:yellow"
+format = "[$path]($style)[$read_only]($read_only_style) "
+truncation_length = 4
+truncation_symbol = "…/"
+read_only = " 󰌾"
+
+[directory.substitutions]
+"/etc/nixos" = "❄ nixos"
+
+[git_branch]
+symbol = " "
+style = "fg:magenta"
+format = '[$symbol$branch]($style) '
+
+[git_status]
+style = "fg:yellow"
+format = '[$all_status$ahead_behind]($style)'
+ahead = "⇡${count} "
+behind = "⇣${count} "
+diverged = "⇕${ahead_count}/${behind_count} "
+untracked = "?${count} "
+stashed = "*${count} "
+modified = "!${count} "
+staged = "+${count} "
+deleted = "✘${count} "
+
+[git_metrics]
+disabled = false
+added_style = "fg:green"
+deleted_style = "fg:red"
+format = '[+$added]($added_style)[-$deleted]($deleted_style) '
+
+[nix_shell]
+symbol = "❄ "
+style = "fg:cyan"
+format = '[$symbol$state]($style) '
+impure_msg = "impure"
+pure_msg = "pure"
+
+[rust]
+symbol = " "
+style = "fg:fg"
+format = '[$symbol($version)]($style) '
+
+[nodejs]
+symbol = " "
+style = "fg:fg"
+format = '[$symbol($version)]($style) '
+
+[python]
+symbol = " "
+style = "fg:fg"
+format = '[$symbol($version)( \($virtualenv\))]($style) '
+
+[golang]
+symbol = " "
+style = "fg:fg"
+format = '[$symbol($version)]($style) '
+
+[lua]
+symbol = " "
+style = "fg:fg"
+format = '[$symbol($version)]($style) '
+
+[c]
+symbol = " "
+style = "fg:fg"
+format = '[$symbol($version)]($style) '
+
+[package]
+symbol = "󰏗 "
+style = "fg:fg"
+format = '[$symbol($version)]($style) '
+
+[cmd_duration]
+min_time = 2000
+style = "fg:yellow"
+format = '[󱦟 $duration]($style) '
+
+[jobs]
+symbol = "✦"
+style = "fg:magenta"
+format = '[$symbol$number]($style) '
+
+[time]
+disabled = false
+time_format = "%H:%M"
+style = "fg:muted"
+format = '[$time]($style)'
+
+[character]
+success_symbol = "[❯](bold fg:accent)"
+error_symbol = "[❯](bold fg:red)"
+vimcmd_symbol = "[❮](bold fg:magenta)"
+
+[palettes.graphite]
+fg = "#d4d4d4"
+muted = "#6a6a6a"
+accent = "#8fa1b3"
+red = "#bf8b8b"
+green = "#9ab08f"
+yellow = "#c4a97b"
+blue = "#8fa1b3"
+magenta = "#b096b0"
+cyan = "#8fb3ab"
+
+[palettes.mocha]
+fg = "#cdd6f4"
+muted = "#6c7086"
+accent = "#cba6f7"
+red = "#f38ba8"
+green = "#a6e3a1"
+yellow = "#f9e2af"
+blue = "#89b4fa"
+magenta = "#f5c2e7"
+cyan = "#94e2d5"
+
+[palettes.latte]
+fg = "#4c4f69"
+muted = "#9ca0b0"
+accent = "#8839ef"
+red = "#d20f39"
+green = "#40a02b"
+yellow = "#df8e1d"
+blue = "#1e66f5"
+magenta = "#ea76cb"
+cyan = "#179299"
+
+[palettes.tokyonight]
+fg = "#c0caf5"
+muted = "#565f89"
+accent = "#7aa2f7"
+red = "#f7768e"
+green = "#9ece6a"
+yellow = "#e0af68"
+blue = "#7aa2f7"
+magenta = "#bb9af7"
+cyan = "#7dcfff"
+
+[palettes.rosepine]
+fg = "#e0def4"
+muted = "#6e6a86"
+accent = "#c4a7e7"
+red = "#eb6f92"
+green = "#9ccfd8"
+yellow = "#f6c177"
+blue = "#31748f"
+magenta = "#ebbcba"
+cyan = "#9ccfd8"
+
+[palettes.gruvbox]
+fg = "#ebdbb2"
+muted = "#928374"
+accent = "#fe8019"
+red = "#fb4934"
+green = "#b8bb26"
+yellow = "#fabd2f"
+blue = "#83a598"
+magenta = "#d3869b"
+cyan = "#8ec07c"
+
+[palettes.nord]
+fg = "#d8dee9"
+muted = "#7b88a1"
+accent = "#88c0d0"
+red = "#bf616a"
+green = "#a3be8c"
+yellow = "#ebcb8b"
+blue = "#81a1c1"
+magenta = "#b48ead"
+cyan = "#88c0d0"
+
