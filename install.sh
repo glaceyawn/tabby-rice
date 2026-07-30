@@ -15,6 +15,20 @@ R=$'\033[0m'; B=$'\033[1m'; DIM=$'\033[2m'
 FG1=$'\033[38;5;110m'; FG2=$'\033[38;5;175m'; FG3=$'\033[38;5;180m'
 OK=$'\033[38;5;108m'; ERR=$'\033[38;5;174m'
 head_() { printf '\n%s%s── %s %s\n' "$B" "$FG1" "$1" "$R"; }
+# step: a clean screen transition between major phases (readable for beginners).
+# clears, reprints a compact banner + which step we're on, then the section header.
+STEP_N=0; STEP_TOTAL=6
+step() {  # step "title" — pause, clear, show progress + header
+    STEP_N=$((STEP_N+1))
+    # only pause between steps (not before the first), and only when interactive
+    if [ "$STEP_N" -gt 1 ] && [ -t 0 ]; then
+        printf '\n  %s· press Enter to continue%s ' "$FG3" "$R"; read -r _
+    fi
+    clear 2>/dev/null || printf '\033[2J\033[H'
+    printf '%s%s  tabby rice%s   %s· step %d of %d%s\n' "$B" "$FG1" "$R" "$FG3" "$STEP_N" "$STEP_TOTAL" "$R"
+    printf '%s  ────────────────────────────────%s\n' "$FG3" "$R"
+    head_ "$1"
+}
 good()  { printf '  %s✔%s %s\n' "$OK" "$R" "$1"; }
 bad()   { printf '  %s✘%s %s\n' "$ERR" "$R" "$1"; }
 note()  { printf '  %s·%s %s\n' "$FG3" "$R" "$1"; }
@@ -79,19 +93,19 @@ detect_distro() {
 # ─── package maps ──────────────────────────────────────────
 PKGS_ARCH=(hyprland waybar rofi kitty starship mako libnotify fastfetch fish
            hyprpicker cliphist wl-clipboard grim slurp swappy
-           brightnessctl playerctl sof-firmware pipewire-pulse wireplumber pavucontrol
+           brightnessctl playerctl pipewire pipewire-pulse pipewire-audio wireplumber pavucontrol sof-firmware
            networkmanager network-manager-applet blueman btop papirus-icon-theme
            ttf-jetbrains-mono-nerd ttf-nerd-fonts-symbols noto-fonts noto-fonts-emoji
            hyprlock hypridle sddm qt6-svg qt6-declarative qt6ct kvantum dolphin awww python)
 PKGS_FEDORA=(hyprland waybar rofi kitty starship mako libnotify fastfetch fish
              hyprpicker cliphist wl-clipboard grim slurp swappy
-             brightnessctl playerctl pipewire-pulse wireplumber pavucontrol
-             NetworkManager sof-firmware network-manager-applet blueman btop papirus-icon-theme
+             brightnessctl playerctl pipewire pipewire-pulseaudio wireplumber pavucontrol alsa-sof-firmware
+             NetworkManager network-manager-applet blueman btop papirus-icon-theme
              jetbrains-mono-fonts google-noto-emoji-fonts
              hyprlock hypridle sddm qt6-qtsvg qt6-qtdeclarative qt6-qtquickcontrols2 qt6ct kvantum dolphin python3)
 PKGS_DEBIAN=(hyprland waybar rofi kitty mako-notifier libnotify-bin fastfetch fish
-             cliphist wl-clipboard pipewire-pulse grim slurp brightnessctl playerctl
-             wireplumber sof-firmware pavucontrol blueman btop papirus-icon-theme
+             cliphist wl-clipboard grim slurp brightnessctl playerctl
+             wireplumber pavucontrol blueman btop papirus-icon-theme
              fonts-jetbrains-mono fonts-noto-color-emoji
              hyprlock hypridle sddm qt6ct dolphin python3)
 
@@ -140,7 +154,7 @@ pm_install() {  # pm_install pkg...
 }
 
 install_packages() {
-    head_ "packages · $DISTRO"
+    step "packages · $DISTRO"
     case "$DISTRO" in
         nixos)
             note "NixOS installs declaratively. The easiest path:"
@@ -289,7 +303,7 @@ enable_services() {
     [ "$DISTRO" = "nixos" ] && return 0   # NixOS handles services declaratively
     command -v systemctl >/dev/null 2>&1 || { note "no systemd — enable your services manually"; return 0; }
 
-    head_ "services"
+    step "services"
 
     # login manager (system service) — this is what replaces 'start-hyprland'
     if command -v sddm >/dev/null 2>&1; then
@@ -331,7 +345,7 @@ enable_services() {
 }
 
 driver_setup() {
-    head_ "graphics drivers"
+    step "graphics drivers"
     detect_gpu
     if [ -z "$GPU_VENDORS" ]; then
         note "couldn't auto-detect a GPU (lspci missing?) — skipping driver setup"
@@ -441,7 +455,7 @@ NX
 
 # ─── browser picker: choose, install, and bind Super+B ─────
 browser_setup() {
-    head_ "default browser"
+    step "default browser"
     menu "which browser? (Super+B will open it)" \
         "Firefox" \
         "Chromium" \
@@ -507,7 +521,7 @@ extra_tools() {
 
 # ─── monitor wizard ────────────────────────────────────────
 monitor_wizard() {
-    head_ "monitor setup"
+    step "monitor setup"
     local MC="$HOME/.config/hypr/monitors.conf"
     mkdir -p "$HOME/.config/hypr"
 
@@ -653,7 +667,7 @@ PYEOF
 
 # ─── configs ───────────────────────────────────────────────
 install_configs() {
-    head_ "configs + scripts"
+    step "configs + scripts"
     note "backing up anything replaced → $BACKUP"
     local f rel
     while IFS= read -r f; do
