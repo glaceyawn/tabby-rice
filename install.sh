@@ -79,19 +79,19 @@ detect_distro() {
 # ─── package maps ──────────────────────────────────────────
 PKGS_ARCH=(hyprland waybar rofi kitty starship mako libnotify fastfetch fish
            hyprpicker cliphist wl-clipboard grim slurp swappy
-           brightnessctl playerctl wireplumber pavucontrol
+           brightnessctl playerctl sof-firmware pipewire-pulse wireplumber pavucontrol
            networkmanager network-manager-applet blueman btop papirus-icon-theme
            ttf-jetbrains-mono-nerd ttf-nerd-fonts-symbols noto-fonts noto-fonts-emoji
            hyprlock hypridle sddm qt6-svg qt6-declarative qt6ct kvantum dolphin awww python)
 PKGS_FEDORA=(hyprland waybar rofi kitty starship mako libnotify fastfetch fish
              hyprpicker cliphist wl-clipboard grim slurp swappy
-             brightnessctl playerctl wireplumber pavucontrol
-             NetworkManager network-manager-applet blueman btop papirus-icon-theme
+             brightnessctl playerctl pipewire-pulse wireplumber pavucontrol
+             NetworkManager sof-firmware network-manager-applet blueman btop papirus-icon-theme
              jetbrains-mono-fonts google-noto-emoji-fonts
              hyprlock hypridle sddm qt6-qtsvg qt6-qtdeclarative qt6-qtquickcontrols2 qt6ct kvantum dolphin python3)
 PKGS_DEBIAN=(hyprland waybar rofi kitty mako-notifier libnotify-bin fastfetch fish
-             cliphist wl-clipboard grim slurp brightnessctl playerctl
-             wireplumber pavucontrol blueman btop papirus-icon-theme
+             cliphist wl-clipboard pipewire-pulse grim slurp brightnessctl playerctl
+             wireplumber sof-firmware pavucontrol blueman btop papirus-icon-theme
              fonts-jetbrains-mono fonts-noto-color-emoji
              hyprlock hypridle sddm qt6ct dolphin python3)
 
