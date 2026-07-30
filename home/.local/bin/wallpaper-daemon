@@ -1,3 +1,0 @@
-#!/usr/bin/env bash
-# starts whichever wallpaper daemon this distro ships (awww = renamed swww)
-exec "$(command -v awww-daemon || command -v swww-daemon)" "$@"

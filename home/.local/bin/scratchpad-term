@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-# scratchpad-term — dropdown terminal that spawns on first use, toggles after
-if hyprctl clients -j | grep -q '"class": "kitty-scratch"'; then
-    hyprctl dispatch togglespecialworkspace term
-else
-    hyprctl dispatch exec "[workspace special:term silent] kitty --class kitty-scratch"
-    sleep 0.3
-    hyprctl dispatch togglespecialworkspace term
-fi
