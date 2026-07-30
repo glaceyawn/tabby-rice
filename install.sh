@@ -80,13 +80,13 @@ detect_distro() {
 PKGS_ARCH=(hyprland waybar rofi kitty starship mako libnotify fastfetch fish
            hyprpicker cliphist wl-clipboard grim slurp swappy
            brightnessctl playerctl wireplumber pavucontrol
-           network-manager-applet blueman btop papirus-icon-theme
+           networkmanager network-manager-applet blueman btop papirus-icon-theme
            ttf-jetbrains-mono-nerd ttf-nerd-fonts-symbols noto-fonts noto-fonts-emoji
            hyprlock hypridle sddm qt6-svg qt6-declarative qt6ct kvantum dolphin awww python)
 PKGS_FEDORA=(hyprland waybar rofi kitty starship mako libnotify fastfetch fish
              hyprpicker cliphist wl-clipboard grim slurp swappy
              brightnessctl playerctl wireplumber pavucontrol
-             network-manager-applet blueman btop papirus-icon-theme
+             NetworkManager network-manager-applet blueman btop papirus-icon-theme
              jetbrains-mono-fonts google-noto-emoji-fonts
              hyprlock hypridle sddm qt6-qtsvg qt6-qtdeclarative qt6-qtquickcontrols2 qt6ct kvantum dolphin python3)
 PKGS_DEBIAN=(hyprland waybar rofi kitty mako-notifier libnotify-bin fastfetch fish
@@ -228,13 +228,30 @@ NIX
 # ─── GPU / driver detection ────────────────────────────────
 detect_gpu() {
     GPU_VENDORS=""   # space-separated: nvidia amd intel
+    # lspci lives in pciutils — a minimal install may not have it, which is
+    # why detection sometimes "finds no GPU". install it first if missing.
+    if ! command -v lspci >/dev/null 2>&1; then
+        note "installing pciutils so GPU detection works..."
+        pm_install pciutils >/dev/null 2>&1
+    fi
     local pci=""
     command -v lspci >/dev/null 2>&1 && pci="$(lspci 2>/dev/null | grep -iE 'vga|3d|display')"
     echo "$pci" | grep -qi nvidia && GPU_VENDORS="$GPU_VENDORS nvidia"
     echo "$pci" | grep -qiE 'advanced micro devices|\bamd\b|\bradeon\b|\[amd/ati\]' && GPU_VENDORS="$GPU_VENDORS amd"
     echo "$pci" | grep -qi 'intel' && GPU_VENDORS="$GPU_VENDORS intel"
-    GPU_VENDORS="$(echo "$GPU_VENDORS" | xargs)"   # trim
+    # fallback: read kernel driver info from /sys if lspci still gave nothing
+    if [ -z "$GPU_VENDORS" ]; then
+        for d in /sys/class/drm/card*/device/vendor; do
+            [ -r "$d" ] || continue
+            case "$(cat "$d" 2>/dev/null)" in
+                0x10de) GPU_VENDORS="$GPU_VENDORS nvidia" ;;
+                0x1002) GPU_VENDORS="$GPU_VENDORS amd" ;;
+                0x8086) GPU_VENDORS="$GPU_VENDORS intel" ;;
+            esac
+        done
+    fi
     [ -z "$GPU_VENDORS" ] && [ -d /proc/driver/nvidia ] && GPU_VENDORS="nvidia"
+    GPU_VENDORS="$(echo "$GPU_VENDORS" | tr ' ' '\n' | sort -u | xargs)"   # dedup + trim
 }
 
 # ─── AUR helper (yay) bootstrap ────────────────────────────
@@ -244,10 +261,8 @@ ensure_yay() {
     [ "$DISTRO" = "arch" ] || return 1
     command -v yay  >/dev/null 2>&1 && { AUR_HELPER=yay;  return 0; }
     command -v paru >/dev/null 2>&1 && { AUR_HELPER=paru; return 0; }
-    # no helper present — offer to build yay
-    ask "an AUR helper (yay) is needed for some packages. install it now? [Y/n]"
-    [ "$REPLY" = "n" ] && { note "skipping yay — AUR packages will need manual install"; return 1; }
-    note "building yay from the AUR (needs base-devel + git)..."
+    # no helper present — build yay automatically (needed for AUR packages)
+    note "installing yay (AUR helper) — needed for some packages..."
     pm_install --needed git base-devel || { bad "couldn't install build deps for yay"; return 1; }
     local tmp
     tmp="$(mktemp -d)"
@@ -265,6 +280,54 @@ aur_install() {  # aur_install pkg...  — installs from AUR via yay/paru
     ensure_yay || { note "can't install from AUR without a helper: $*"; return 1; }
     # never run an AUR helper as root; it drops privileges itself
     "$AUR_HELPER" -S --needed --noconfirm "$@"
+}
+
+# ─── enable the services a working desktop needs ───────────
+# installing packages isn't enough — the daemons have to be enabled, or the
+# user boots to no login manager, no network, and no audio.
+enable_services() {
+    [ "$DISTRO" = "nixos" ] && return 0   # NixOS handles services declaratively
+    command -v systemctl >/dev/null 2>&1 || { note "no systemd — enable your services manually"; return 0; }
+
+    head_ "services"
+
+    # login manager (system service) — this is what replaces 'start-hyprland'
+    if command -v sddm >/dev/null 2>&1; then
+        if systemctl is-enabled sddm >/dev/null 2>&1; then
+            good "SDDM login manager already enabled"
+        else
+            # disable any other display manager first to avoid a conflict
+            for dm in gdm lightdm lxdm greetd ly; do
+                systemctl is-enabled "$dm" >/dev/null 2>&1 && sudo systemctl disable "$dm" >/dev/null 2>&1
+            done
+            sudo systemctl enable sddm >/dev/null 2>&1 && good "SDDM login manager enabled (no more start-hyprland)" \
+                || bad "couldn't enable SDDM — run: sudo systemctl enable sddm"
+        fi
+    fi
+
+    # network (system service)
+    if systemctl list-unit-files NetworkManager.service >/dev/null 2>&1; then
+        if systemctl is-enabled NetworkManager >/dev/null 2>&1; then
+            good "NetworkManager already enabled"
+        else
+            sudo systemctl enable --now NetworkManager >/dev/null 2>&1 && good "NetworkManager enabled" \
+                || note "enable networking with: sudo systemctl enable --now NetworkManager"
+        fi
+    fi
+
+    # bluetooth (system service, optional)
+    systemctl list-unit-files bluetooth.service >/dev/null 2>&1 && \
+        sudo systemctl enable bluetooth >/dev/null 2>&1 && good "bluetooth enabled"
+
+    # audio (USER services — pipewire/wireplumber, no sudo)
+    if systemctl --user list-unit-files wireplumber.service >/dev/null 2>&1; then
+        systemctl --user enable --now pipewire pipewire-pulse wireplumber >/dev/null 2>&1 \
+            && good "audio (pipewire + wireplumber) enabled" \
+            || note "start audio with: systemctl --user enable --now pipewire pipewire-pulse wireplumber"
+    else
+        note "audio: after logging into your user session, run:"
+        note "  systemctl --user enable --now pipewire pipewire-pulse wireplumber"
+    fi
 }
 
 driver_setup() {
@@ -706,7 +769,7 @@ menu "what would you like to do?" \
     "Install graphics drivers" \
     "Quit"
 case "$CHOICE" in
-    1) install_packages; driver_setup; extra_tools; install_configs; browser_setup; monitor_wizard; FULL_INSTALL=1 ;;
+    1) install_packages; enable_services; driver_setup; extra_tools; install_configs; browser_setup; monitor_wizard; FULL_INSTALL=1 ;;
     2) install_configs; browser_setup; monitor_wizard ;;
     3) monitor_wizard; exit 0 ;;
     4) driver_setup; exit 0 ;;

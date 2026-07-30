@@ -19,6 +19,9 @@
     xwayland.enable = true;
   };
 
+  # ─── network ───────────────────────────────────────────
+  networking.networkmanager.enable = true;
+
   # ─── login manager: SDDM on Wayland ────────────────────
   services.displayManager.sddm = {
     enable = true;
