@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# powermenu — themed wlogout power menu (animated row of icon cards)
+CFG="$HOME/.config/wlogout"
+exec wlogout \
+    --layout "$CFG/layout" \
+    --css "$CFG/style.css" \
+    --buttons-per-row 5 \
+    --column-spacing 20 \
+    --row-spacing 20 \
+    --margin-top 380 \
+    --margin-bottom 380 \
+    --margin-left 120 \
+    --margin-right 120 \
+    --protocol layer-shell

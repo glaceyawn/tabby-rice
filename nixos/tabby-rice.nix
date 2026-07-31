@@ -71,10 +71,12 @@
     python3
   ];
 
-  # make Qt apps (PCManFM-Qt, etc.) use qt6ct theming
+  # make Qt apps (PCManFM-Qt, etc.) use qtct theming.
+  # NOTE: on NixOS the platformTheme value is "qt5ct" even for Qt6 apps —
+  # "qt6ct" isn't a valid value here; qt5ct is the qtct integration name.
   qt = {
     enable = true;
-    platformTheme = "qt6ct";
+    platformTheme = "qt5ct";
   };
 
   # ─── polkit agent (for auth prompts) ───────────────────

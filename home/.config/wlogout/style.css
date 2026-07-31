@@ -1,0 +1,65 @@
+/* wlogout — tabby rice. colors from wlogout-colors.css (theme-switch) */
+@import "wlogout-colors.css";
+
+* {
+    font-family: "JetBrainsMono Nerd Font", monospace;
+    font-size: 16px;
+    background-image: none;
+    box-shadow: none;
+    outline: none;
+    text-shadow: none;
+}
+
+/* dim, blurred backdrop with a smooth fade-in */
+window {
+    background-color: alpha(@bg, 0.55);
+    animation: fadein 250ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fadein {
+    from { background-color: alpha(@bg, 0.0); }
+    to   { background-color: alpha(@bg, 0.55); }
+}
+
+/* the buttons: rounded cards that rise + glow on focus */
+button {
+    color: @fg;
+    background-color: @bg1;
+    border: 2px solid @bg2;
+    border-radius: 24px;
+    margin: 14px;
+    padding: 0;
+    background-repeat: no-repeat;
+    background-position: center 38%;
+    background-size: 42%;
+    transition: all 200ms cubic-bezier(0.16, 1, 0.3, 1);
+    animation: slidein 400ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* each button eases up from slightly below on open */
+@keyframes slidein {
+    from { margin-top: 40px; opacity: 0; }
+    to   { margin-top: 14px; opacity: 1; }
+}
+
+button:focus,
+button:hover {
+    background-color: @accent;
+    color: @bg;
+    border: 2px solid @accent;
+    background-size: 48%;
+    /* subtle lift toward the viewer */
+    margin: 8px;
+    box-shadow: 0 12px 40px alpha(@accent, 0.35);
+}
+
+/* the text label sits below the icon */
+button {
+    text-shadow: none;
+}
+
+#lock    { background-image: image(url("icons/lock.svg")); }
+#logout  { background-image: image(url("icons/logout.svg")); }
+#suspend { background-image: image(url("icons/suspend.svg")); }
+#reboot  { background-image: image(url("icons/reboot.svg")); }
+#shutdown{ background-image: image(url("icons/shutdown.svg")); }

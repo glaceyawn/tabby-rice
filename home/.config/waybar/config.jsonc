@@ -157,6 +157,6 @@
     "custom/power": {
         "format": "⏻",
         "tooltip": false,
-        "on-click": "sh -c 'sel=$(printf \"lock\\nlogout\\nreboot\\nshutdown\" | rofi -dmenu -p power); case \"$sel\" in lock) hyprlock ;; logout) hyprctl dispatch exit ;; reboot) systemctl reboot ;; shutdown) systemctl poweroff ;; esac'"
+        "on-click": "~/.local/bin/powermenu"
     }
 }

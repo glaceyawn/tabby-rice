@@ -10,15 +10,37 @@ STATE="$TE/current"
 WALLS="$HOME/Pictures/wallpapers"
 
 pick() {
-    printf '%b\n' \
-        "󰤄  graphite" \
-        "󰄛  mocha" \
-        "󰄛  latte" \
-        "󰅆  tokyonight" \
-        "󱎂  rosepine" \
-        "󰈸  gruvbox" \
-        "󰜗  nord" \
-    | rofi -dmenu -p "󰏘 theme" -i | awk '{print $2}'
+    # load the CURRENT theme's palette so the picker itself is themed
+    local cur; cur="$(cat "$STATE" 2>/dev/null || echo graphite)"
+    # shellcheck disable=SC1090
+    [ -f "$TE/themes/$cur.sh" ] && . "$TE/themes/$cur.sh"
+    # generate a small swatch preview per theme (cached), then show a card grid
+    local cache="$TE/swatches"
+    mkdir -p "$cache"
+    local out=""
+    for t in graphite mocha latte tokyonight rosepine gruvbox nord; do
+        local sw="$cache/$t.png"
+        if [ ! -f "$sw" ] && command -v convert >/dev/null 2>&1; then
+            # shellcheck disable=SC1090
+            ( . "$TE/themes/$t.sh"
+              convert -size 120x120 xc:"#$BG" \
+                -fill "#$ACCENT" -draw "roundrectangle 12,12 108,58 8,8" \
+                -fill "#$GREEN"  -draw "roundrectangle 12,66 58,108 8,8" \
+                -fill "#$RED"    -draw "roundrectangle 66,66 108,108 8,8" \
+                "$sw" 2>/dev/null )
+        fi
+        # rofi dmenu icon format: text\0icon\x1f/path/to/icon
+        if [ -f "$sw" ]; then
+            out+="$t\0icon\x1f$sw\n"
+        else
+            out+="$t\n"
+        fi
+    done
+    printf "%b" "$out" \
+        | rofi -dmenu -p "theme" -i \
+               -theme "$HOME/.config/rofi/grid.rasi" \
+               -theme-str "* { bg0: #${BG}f2; bg1: #${BG1}; bg2: #${BG2}; fg0: #${FG}; muted: #${MUTED}; accent: #${ACCENT}; red: #${RED}; }" \
+               -show-icons
 }
 
 case "${1:-}" in
@@ -51,6 +73,7 @@ cat > "$HOME/.config/hypr/hyprlock-colors.conf" << EOF
 \$accent = rgba(${ACCENT}ff)
 \$green  = rgba(${GREEN}ff)
 \$red    = rgba(${RED}ff)
+\$yellow = rgba(${YELLOW}ff)
 \$MUTEDHEX = ${MUTED}
 \$REDHEX = ${RED}
 EOF
@@ -240,6 +263,25 @@ if command -v papirus-folders >/dev/null 2>&1; then
     # refresh the icon cache so apps pick it up
     command -v gtk-update-icon-cache >/dev/null 2>&1 && \
         gtk-update-icon-cache -f "$USERICONS/Papirus-Dark" >/dev/null 2>&1 || true
+fi
+
+# ── wlogout (power menu) ────────────────────
+mkdir -p "$HOME/.config/wlogout/icons"
+cat > "$HOME/.config/wlogout/wlogout-colors.css" << EOF
+@define-color bg      #${BG};
+@define-color bg1     #${BG1};
+@define-color bg2     #${BG2};
+@define-color fg      #${FG};
+@define-color accent  #${ACCENT};
+EOF
+# recolor the icon SVG strokes AND fills (keyhole dot) to the theme foreground
+if [ -d "$HOME/.config/wlogout/icons" ]; then
+    for svg in "$HOME/.config/wlogout/icons/"*.svg; do
+        [ -f "$svg" ] || continue
+        sed -i "s|stroke=\"#[0-9a-fA-F]*\"|stroke=\"#${FG}\"|g" "$svg" 2>/dev/null
+        # recolor solid fills but never fill="none"
+        sed -i "s|fill=\"#[0-9a-fA-F]*\"|fill=\"#${FG}\"|g" "$svg" 2>/dev/null
+    done
 fi
 
 # ── reload the world ────────────────────────

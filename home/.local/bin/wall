@@ -29,14 +29,19 @@ list_imgs() {  # $1 = dir, $2 = depth
 grid() {  # $@ = files; thumbnail grid, applies choice
     local files=("$@")
     [ ${#files[@]} -eq 0 ] && { notify-send -a theme "wallpaper" "folder is empty — run wall-fetch?"; exit 1; }
+    # load current theme palette so the picker matches the active theme
+    local cur; cur="$(cat "$TE/current" 2>/dev/null || echo graphite)"
+    local CBG=161616 CBG1=1e1e1e CBG2=262626 CFG=d4d4d4 CMUTED=6a6a6a CACCENT=8fa1b3 CRED=bf8b8b
+    if [ -f "$TE/themes/$cur.sh" ]; then
+        # shellcheck disable=SC1090
+        . "$TE/themes/$cur.sh"
+        CBG="$BG"; CBG1="$BG1"; CBG2="$BG2"; CFG="$FG"; CMUTED="$MUTED"; CACCENT="$ACCENT"; CRED="$RED"
+    fi
     CHOICE="$(for f in "${files[@]}"; do
         printf '%s\0icon\x1f%s\n' "$(basename "$f")" "$f"
-    done | rofi -dmenu -p "󰸉 wall" -i -show-icons -theme-str '
-        window { width: 62%; }
-        element-icon { size: 5.2em; }
-        listview { columns: 4; lines: 3; }
-        element { orientation: vertical; }
-        element-text { horizontal-align: 0.5; }')"
+    done | rofi -dmenu -p "wallpaper" -i -show-icons \
+                -theme "$HOME/.config/rofi/grid.rasi" \
+                -theme-str "* { bg0: #${CBG}f2; bg1: #${CBG1}; bg2: #${CBG2}; fg0: #${CFG}; muted: #${CMUTED}; accent: #${CACCENT}; red: #${CRED}; } listview { lines: 3; } element-text { enabled: false; }")"
     [ -z "$CHOICE" ] && exit 0
     for f in "${files[@]}"; do
         [ "$(basename "$f")" = "$CHOICE" ] && { apply "$f"; exit; }
