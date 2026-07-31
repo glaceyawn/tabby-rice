@@ -10,18 +10,15 @@
 
     "modules-left": [
         "custom/logo",
-        "group/wsmedia",
+        "hyprland/workspaces",
         "hyprland/submap",
         "hyprland/window"
     ],
-    "group/wsmedia": {
-        "orientation": "horizontal",
-        "modules": [ "hyprland/workspaces", "mpris" ]
-    },
     "modules-center": [
         "clock"
     ],
     "modules-right": [
+        "mpris",
         "tray",
         "cpu",
         "memory",
