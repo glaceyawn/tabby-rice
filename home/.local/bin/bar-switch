@@ -20,6 +20,7 @@ if [ -z "$STYLE" ]; then
         "󰝤  pills — bubbly capsules" \
         "󰹞  flat — attached, edge-to-edge" \
         "󰊠  ghost — no bar, floating text" \
+        "󰌪  inkstrip — editorial gradient" \
     | rofi -dmenu -p "󰍜 bar style" -i | awk '{print $2}')"
     [ -z "$STYLE" ] && exit 0
     POS="$(printf '%b\n' "󰁝  top" "󰁅  bottom" \
@@ -35,7 +36,7 @@ case "$POS" in top|bottom) ;; *) notify-send -a theme "bar" "position must be to
 cp "$WB/styles/$STYLE.css" "$WB/style.css"
 
 # apply position + margins (flat sits flush, others float)
-if [ "$STYLE" = "flat" ]; then M=0; H=28; else M=4; H=30; fi
+if [ "$STYLE" = "flat" ] || [ "$STYLE" = "inkstrip" ]; then M=0; H=30; else M=4; H=30; fi
 sed -i \
     -e "s/\"position\": \"[a-z]*\"/\"position\": \"$POS\"/" \
     -e "s/\"margin-top\": [0-9]*/\"margin-top\": $M/" \

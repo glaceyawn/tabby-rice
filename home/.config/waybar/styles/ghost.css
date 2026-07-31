@@ -18,7 +18,7 @@ tooltip label { color: @fg; padding: 6px; text-shadow: none; }
     border: none; transition: all 0.2s ease;
 }
 #workspaces button:hover { color: @fg; }
-#workspaces button.active { color: @accent; font-size: 15px; }
+#workspaces button.active { color: @accent; font-size: 15px; text-shadow: 0 0 10px alpha(@accent, 0.7); }
 #workspaces button.urgent { color: @red; }
 #submap { color: @yellow; padding: 0 8px; }
 #window { color: alpha(@fg, 0.6); padding: 0 12px; font-weight: 500; }

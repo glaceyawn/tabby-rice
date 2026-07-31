@@ -124,12 +124,46 @@ Rectangle {
                 }
             }
 
-            Text {
-                anchors.horizontalCenter: parent.horizontalCenter
-                color: root.cFg
-                font.family: "JetBrainsMono Nerd Font Bold"
-                font.pixelSize: 19
-                text: userModel.count > 0 ? userModel.lastUser : "welcome"
+            // username field (editable)
+            Rectangle {
+                width: parent.width
+                height: 50
+                radius: 14
+                color: Qt.rgba(0.08, 0.08, 0.08, 0.9)
+                border.color: username.activeFocus ? root.cAccent : root.cBg2
+                border.width: username.activeFocus ? 2 : 1
+
+                Row {
+                    anchors.fill: parent
+                    anchors.leftMargin: 16
+                    spacing: 10
+                    Text {
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: "󰀄"
+                        font.family: "JetBrainsMono Nerd Font"
+                        font.pixelSize: 16
+                        color: root.cMuted
+                    }
+                    TextInput {
+                        id: username
+                        width: parent.width - 60
+                        anchors.verticalCenter: parent.verticalCenter
+                        color: root.cFg
+                        font.family: "JetBrainsMono Nerd Font"
+                        font.pixelSize: 15
+                        clip: true
+                        text: userModel.count > 0 ? userModel.lastUser : ""
+                        KeyNavigation.tab: password
+                        onAccepted: password.forceActiveFocus()
+                        Text {
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: "username"
+                            color: root.cMuted
+                            font: username.font
+                            visible: username.text.length === 0
+                        }
+                    }
+                }
             }
 
             // password field
@@ -163,7 +197,7 @@ Rectangle {
                         passwordCharacter: "●"
                         focus: true
                         clip: true
-                        onAccepted: sddm.login(usernameOf(), password.text, sessionModel.lastIndex)
+                        onAccepted: sddm.login(username.text, password.text, sessionModel.lastIndex)
                         Text {
                             anchors.verticalCenter: parent.verticalCenter
                             text: "password"
@@ -194,15 +228,10 @@ Rectangle {
                     id: loginArea
                     anchors.fill: parent
                     hoverEnabled: true
-                    onClicked: sddm.login(usernameOf(), password.text, sessionModel.lastIndex)
+                    onClicked: sddm.login(username.text, password.text, sessionModel.lastIndex)
                 }
             }
         }
-    }
-
-    // helper: current username (last user, since we show one)
-    function usernameOf() {
-        return userModel.count > 0 ? userModel.lastUser : "";
     }
 
     // ── error / status message ──
@@ -259,5 +288,5 @@ Rectangle {
         text: "󰧨  Hyprland"
     }
 
-    Component.onCompleted: password.forceActiveFocus()
+    Component.onCompleted: { if (username.text.length > 0) password.forceActiveFocus(); else username.forceActiveFocus(); }
 }

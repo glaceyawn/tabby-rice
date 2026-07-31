@@ -6,19 +6,59 @@
 #        wall /path/img  (set directly)
 set -u
 WPP="$(command -v awww || command -v swww)" || { notify-send "wallpaper" "awww/swww not installed"; exit 1; }
+WPP_NAME="$(basename "$WPP")"          # awww or swww
+DAEMON="${WPP_NAME}-daemon"           # awww-daemon / swww-daemon
 WALLS="$HOME/Pictures/wallpapers"
 TE="$HOME/.config/theme-engine"
 CUR="$(cat "$TE/current" 2>/dev/null || echo graphite)"
 TRANSITIONS=(grow wave outer wipe center any)
 T="${TRANSITIONS[RANDOM % ${#TRANSITIONS[@]}]}"
 
+# make sure the wallpaper daemon is actually running (it sometimes dies,
+# which is what makes the wallpaper go blank and further swaps do nothing)
+ensure_daemon() {
+    if ! pgrep -x "$DAEMON" >/dev/null 2>&1; then
+        # (re)start it detached and give it a moment to take the socket
+        "$DAEMON" >/dev/null 2>&1 &
+        disown 2>/dev/null || true
+        sleep 0.6
+    fi
+}
+
+# a safe cursor position for the transition origin — falls back to center
+cursor_pos() {
+    local p
+    p="$(hyprctl cursorpos 2>/dev/null | tr -d ' ')"
+    # must look like "1234,567"; otherwise don't pass a pos at all
+    if printf '%s' "$p" | grep -qE '^[0-9]+,[0-9]+$'; then
+        printf '%s' "$p"
+    else
+        printf 'center'
+    fi
+}
+
 apply() {
-    "$WPP" img "$1" \
-        --transition-type "$T" \
-        --transition-pos "$(hyprctl cursorpos | tr -d ' ')" \
-        --transition-duration 1.4 \
-        --transition-fps 180 \
-        --transition-bezier .09,.91,.52,1.05
+    ensure_daemon
+    local pos; pos="$(cursor_pos)"
+    local posargs=()
+    if [ "$pos" = "center" ]; then
+        posargs=( --transition-type center )
+    else
+        posargs=( --transition-type "$T" --transition-pos "$pos" )
+    fi
+    # try the fancy transition; if the daemon errors, restart it and do a
+    # plain set so the wallpaper never ends up blank
+    if ! "$WPP" img "$1" \
+            "${posargs[@]}" \
+            --transition-duration 1.2 \
+            --transition-fps 120 \
+            --transition-bezier .09,.91,.52,1.05 2>/dev/null; then
+        pkill -x "$DAEMON" 2>/dev/null || true
+        sleep 0.3
+        ensure_daemon
+        "$WPP" img "$1" --transition-type none 2>/dev/null \
+            || notify-send -a theme "wallpaper" "couldn't set wallpaper (daemon issue)"
+    fi
     notify-send -a theme "wallpaper" "$(basename "$1") · $T"
 }
 
@@ -38,13 +78,17 @@ grid() {  # $@ = files; thumbnail grid, applies choice
         CBG="$BG"; CBG1="$BG1"; CBG2="$BG2"; CFG="$FG"; CMUTED="$MUTED"; CACCENT="$ACCENT"; CRED="$RED"
     fi
     CHOICE="$(for f in "${files[@]}"; do
-        printf '%s\0icon\x1f%s\n' "$(basename "$f")" "$f"
+        bn="$(basename "$f")"
+        # clean display name: strip extension, swap _/- for spaces
+        disp="${bn%.*}"; disp="${disp//_/ }"; disp="${disp//-/ }"
+        printf '%s\0icon\x1f%s\n' "$disp" "$f"
     done | rofi -dmenu -p "wallpaper" -i -show-icons \
                 -theme "$HOME/.config/rofi/grid.rasi" \
-                -theme-str "* { bg0: #${CBG}f2; bg1: #${CBG1}; bg2: #${CBG2}; fg0: #${CFG}; muted: #${CMUTED}; accent: #${CACCENT}; red: #${CRED}; } listview { lines: 3; } element-text { enabled: false; }")"
+                -theme-str "* { bg0: #${CBG}f2; bg1: #${CBG1}; bg2: #${CBG2}; fg0: #${CFG}; muted: #${CMUTED}; accent: #${CACCENT}; red: #${CRED}; } listview { columns: 3; lines: 2; } element-icon { size: 200px; } element-text { enabled: true; horizontal-align: 0.5; }")"
     [ -z "$CHOICE" ] && exit 0
     for f in "${files[@]}"; do
-        [ "$(basename "$f")" = "$CHOICE" ] && { apply "$f"; exit; }
+        bn="$(basename "$f")"; disp="${bn%.*}"; disp="${disp//_/ }"; disp="${disp//-/ }"
+        [ "$disp" = "$CHOICE" ] && { apply "$f"; exit; }
     done
 }
 

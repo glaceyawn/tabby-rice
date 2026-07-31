@@ -1,0 +1,73 @@
+/* inkstrip — sleek attached bar with accent-gradient underline + glow
+   a modern editorial look, theme-driven */
+@import "colors.css";
+* {
+    font-family: "JetBrainsMono Nerd Font", "Symbols Nerd Font", monospace;
+    font-size: 13px; font-weight: 600; min-height: 0; padding: 0; margin: 0;
+}
+window#waybar {
+    background: linear-gradient(180deg, alpha(@bg, 0.97) 0%, alpha(@bg, 0.90) 100%);
+    color: @fg;
+    border-bottom: 2px solid alpha(@accent, 0.5);
+}
+window#waybar > box { padding: 0 12px; }
+tooltip { background: @bg1; border: 1px solid @accent; border-radius: 8px; }
+tooltip label { color: @fg; padding: 6px; }
+
+#custom-logo {
+    color: @accent; font-size: 16px; padding: 0 14px 0 4px;
+    text-shadow: 0 0 10px alpha(@accent, 0.6);
+}
+
+#workspaces { padding: 0 4px; }
+#workspaces button {
+    color: @muted; padding: 0 10px; background: transparent;
+    border: none; border-radius: 0;
+    border-top: 2px solid transparent;
+    transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+#workspaces button:hover {
+    color: @fg; background: alpha(@accent, 0.08);
+    border-top: 2px solid alpha(@accent, 0.4);
+}
+#workspaces button.active {
+    color: @accent; font-weight: 800;
+    background: alpha(@accent, 0.12);
+    border-top: 2px solid @accent;
+    text-shadow: 0 0 8px alpha(@accent, 0.5);
+}
+#workspaces button.urgent {
+    color: @red; border-top: 2px solid @red;
+    background: alpha(@red, 0.12);
+}
+
+#submap { color: @yellow; padding: 0 10px; text-shadow: 0 0 8px alpha(@yellow, 0.5); }
+#window { color: @muted; padding: 0 12px; font-weight: 400; font-style: italic; }
+#clock {
+    color: @fg; padding: 0 16px; font-weight: 700;
+    text-shadow: 0 0 6px alpha(@fg, 0.3);
+}
+
+#mpris, #cpu, #memory, #network, #backlight, #wireplumber, #battery, #tray,
+#custom-theme, #custom-wallpaper, #custom-power {
+    padding: 0 10px; background: transparent;
+    transition: all 0.2s ease;
+}
+#mpris:hover, #cpu:hover, #memory:hover, #network:hover, #backlight:hover,
+#wireplumber:hover, #battery:hover, #custom-theme:hover,
+#custom-wallpaper:hover, #custom-power:hover {
+    text-shadow: 0 0 10px currentColor;
+}
+#mpris { color: @green; } #mpris.paused { color: @muted; }
+#cpu { color: @cyan; } #memory { color: @blue; }
+#network { color: @green; } #network.disconnected { color: @red; }
+#backlight { color: @yellow; }
+#wireplumber { color: @magenta; } #wireplumber.muted { color: @muted; }
+#battery { color: @green; } #battery.charging { color: @cyan; }
+#battery.warning:not(.charging) { color: @yellow; }
+#battery.critical:not(.charging) { color: @red; }
+#cpu.warning, #memory.warning { color: @yellow; }
+#custom-theme { color: @accent; } #custom-wallpaper { color: @magenta; }
+#custom-power { color: @red; font-size: 14px; }
+#custom-power:hover { color: @red; text-shadow: 0 0 12px @red; }
+#tray { padding: 0 8px; }

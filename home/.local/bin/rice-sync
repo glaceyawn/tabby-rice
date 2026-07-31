@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+# rice-sync — drop the latest tabby-rice files onto this machine and reload live.
+# usage:  rice-sync                 (sync everything from ~/Downloads/tabby-rice-v12)
+#         rice-sync ~/some/dir      (sync from a specific unzipped folder)
+#         rice-sync bars            (only waybar styles + reload waybar)
+#         rice-sync wall            (only the wall script)
+#         rice-sync theme           (only theme-switch + rofi grid)
+set -u
+
+SRC="${1:-$HOME/Downloads/tabby-rice-v12}"
+# if the first arg is a section keyword, shift it out and keep default SRC
+case "$SRC" in
+    bars|wall|theme|sddm|lock|all) SECTION="$SRC"; SRC="$HOME/Downloads/tabby-rice-v12" ;;
+    *) SECTION="${2:-all}" ;;
+esac
+
+C="$HOME/.config"; B="$HOME/.local/bin"
+G="\033[38;5;108m"; Y="\033[38;5;179m"; D="\033[2m"; R="\033[0m"
+ok(){ printf "  ${G}✔${R} %s\n" "$1"; }
+info(){ printf "  ${D}·${R} %s\n" "$1"; }
+
+[ -d "$SRC/home" ] || { printf "can't find rice files at %s\n(unzip the v12 zip first, or pass the folder path)\n" "$SRC"; exit 1; }
+
+sync_bars() {
+    mkdir -p "$C/waybar/styles"
+    cp "$SRC/home/.config/waybar/styles/"*.css "$C/waybar/styles/" && ok "waybar styles (5)"
+    cp "$SRC/home/.config/waybar/config.jsonc" "$C/waybar/config.jsonc" && ok "waybar config"
+    cp "$SRC/home/.local/bin/bar-switch" "$B/bar-switch" && chmod +x "$B/bar-switch" && ok "bar-switch"
+    # hyprland.conf carries the waybar layer rules (blur off, etc.) — sync + reload
+    cp "$SRC/home/.config/hypr/hyprland.conf" "$C/hypr/hyprland.conf" && ok "hyprland.conf"
+    hyprctl reload >/dev/null 2>&1 && info "hyprland reloaded"
+    # reload waybar live (full restart so layer rules re-apply)
+    pkill -x waybar 2>/dev/null; sleep 0.4; (waybar >/dev/null 2>&1 & disown) && info "waybar reloaded"
+}
+sync_theme() {
+    cp "$SRC/home/.local/bin/theme-switch" "$B/theme-switch" && chmod +x "$B/theme-switch" && ok "theme-switch"
+    cp "$SRC/home/.config/rofi/grid.rasi" "$C/rofi/grid.rasi" && ok "rofi grid"
+}
+sync_wall() {
+    cp "$SRC/home/.local/bin/wall" "$B/wall" && chmod +x "$B/wall" && ok "wall"
+    cp "$SRC/home/.local/bin/wallpaper-daemon" "$B/wallpaper-daemon" 2>/dev/null && chmod +x "$B/wallpaper-daemon" && ok "wallpaper-daemon"
+}
+sync_lock() {
+    cp "$SRC/home/.config/hypr/hyprlock.conf" "$C/hypr/hyprlock.conf" && ok "hyprlock.conf"
+}
+sync_sddm() {
+    if [ -w /usr/share/sddm/themes/tabby ] || sudo -n true 2>/dev/null; then
+        sudo cp "$SRC/home/.config/sddm/tabby/Main.qml" /usr/share/sddm/themes/tabby/Main.qml && ok "SDDM Main.qml (system)"
+    else
+        info "SDDM needs sudo — run: sudo cp \"$SRC/home/.config/sddm/tabby/Main.qml\" /usr/share/sddm/themes/tabby/"
+    fi
+}
+
+printf "${Y}rice-sync${R}  ${D}from %s${R}\n" "$SRC"
+case "$SECTION" in
+    bars)  sync_bars ;;
+    theme) sync_theme; ok "run 'theme-switch' to see it" ;;
+    wall)  sync_wall ;;
+    lock)  sync_lock; info "run 'hyprlock' to preview" ;;
+    sddm)  sync_sddm ;;
+    all)
+        sync_bars; sync_theme; sync_wall; sync_lock; sync_sddm
+        # re-run theme-switch so every generated file refreshes
+        [ -x "$B/theme-switch" ] && "$B/theme-switch" "$(cat "$C/theme-engine/current" 2>/dev/null || echo graphite)" >/dev/null 2>&1 && ok "theme reapplied"
+        ;;
+    *) printf "unknown section: %s (use: bars|theme|wall|lock|sddm|all)\n" "$SECTION"; exit 1 ;;
+esac
+printf "${G}done${R}\n"

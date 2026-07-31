@@ -20,21 +20,21 @@ window#waybar > box { background: transparent; }
 
 /* the three islands — petal corners are the signature */
 .modules-left {
-    background: alpha(@bg, 0.92);
+    background: @bg;
     border: 1px solid alpha(@bg2, 0.8);
     border-radius: 18px 6px 18px 6px;
     padding: 0 12px;
     margin: 4px 8px;
 }
 .modules-center {
-    background: alpha(@bg, 0.92);
+    background: @bg;
     border: 1px solid alpha(@bg2, 0.8);
     border-radius: 6px 18px 6px 18px;
     padding: 0 4px;
     margin: 4px 0;
 }
 .modules-right {
-    background: alpha(@bg, 0.92);
+    background: @bg;
     border: 1px solid alpha(@bg2, 0.8);
     border-radius: 18px 6px 18px 6px;
     padding: 0 10px;
@@ -72,6 +72,7 @@ tooltip label { color: @fg; padding: 6px; }
     color: @accent;
     font-weight: 800;
     border-bottom: 2px solid @accent;
+    box-shadow: 0 3px 8px -2px alpha(@accent, 0.7);
 }
 #workspaces button.urgent {
     color: @red;
@@ -126,4 +127,8 @@ tooltip label { color: @fg; padding: 6px; }
     color: @red;
     font-size: 14px;
     padding: 0 4px 0 10px;
+}
+#custom-power:hover {
+    border-bottom: 2px solid @red;
+    box-shadow: 0 3px 8px -2px alpha(@red, 0.7);
 }
